@@ -1,5 +1,5 @@
 #!/bin/bash
-# Variables communes aux jobs (test.sh, noeud.sh, vague.sh) et à chaque commande des files.
+# Variables communes aux jobs (test.sh, noeud.sh) et à chaque commande des files.
 # À remplir une fois, puis depuis la racine du dépôt :  source slurm/env.sh
 export DIR="/p/project1/training2666/team_Epi84"
 case "$DIR" in "<"*) echo "Remplacez <dossier_projet> dans slurm/env.sh"
@@ -18,5 +18,3 @@ export HF_HOME="${HF_HOME:-$DIR/hf_cache}"
 export HF_HUB_OFFLINE=1                           # pas d'internet sur les nœuds de calcul (API MET : voir met/)
 export SCORES_CSV="$DIR/scores.csv"               # journal des scores commun à toute l'équipe
 umask 002                                         # fichiers lisibles et modifiables par l'équipe
-export MODEL_PATH="$DIR/models/<nom_du_modele>"   # Model Equality Testing, à remplacer
-export IMAGES="<dossier_images>"                  # Pixel Seal : images de test (connu à 12h)

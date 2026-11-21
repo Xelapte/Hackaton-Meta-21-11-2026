@@ -66,6 +66,26 @@ def stats(logits, labels):
             "accord_avec_orig": (logits.argmax(-1) == labels).float().mean().item()}
 
 
+def retoucher(x, force):
+    """Retouches aléatoires (le score porte aussi sur des copies retouchées des images)."""
+    if force == "aucun":
+        return x
+    b = x.shape[0]
+    if torch.rand(1).item() < 0.5:
+        x = x.flip(-1)
+    if force == "fort":
+        # recadrage aléatoire (75 à 100 % du côté) puis retour à 224
+        t = int(224 * (0.75 + 0.25 * torch.rand(1).item()))
+        y0, x0 = torch.randint(0, 224 - t + 1, (2,)).tolist()
+        x = F.interpolate(x[:, :, y0:y0 + t, x0:x0 + t], size=224, mode="bilinear", align_corners=False)
+    # luminosité et contraste (x est dans [-1, 1])
+    amp = 0.2 if force == "fort" else 0.1
+    lum = (torch.rand(b, 1, 1, 1, device=x.device) - 0.5) * 2 * amp
+    con = 1 + (torch.rand(b, 1, 1, 1, device=x.device) - 0.5) * 2 * amp
+    m = x.mean((1, 2, 3), keepdim=True)
+    return ((x - m) * con + m + lum).clamp(-1, 1)
+
+
 def params_a_entrainer(model, quoi):
     for p in model.parameters():
         p.requires_grad_(quoi == "all")
@@ -94,6 +114,8 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-5)
     ap.add_argument("--anchor", type=float, default=1e-2, help="poids de l'ancre L2 vers l'original")
     ap.add_argument("--params", default="all", choices=["all", "last", "norm", "head"])
+    ap.add_argument("--aug", default="fort", choices=["fort", "leger", "aucun"],
+                    help="retouches pendant l'entraînement (copies retouchées dans le score)")
     ap.add_argument("--out", default="submission.pt")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--fake", action="store_true")
@@ -115,9 +137,7 @@ def main():
     n = len(imgs)
     for step in range(args.steps):
         idx = torch.randint(0, n, (args.bs,))
-        x = prep(imgs[idx])
-        if torch.rand(1).item() < 0.5:
-            x = x.flip(-1)                          # petite augmentation
+        x = retoucher(prep(imgs[idx]), args.aug)
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=torch.cuda.is_available()):
             out = model(x).float()
         kl = F.kl_div(out.log_softmax(-1), cible[idx].to(dev), reduction="batchmean")

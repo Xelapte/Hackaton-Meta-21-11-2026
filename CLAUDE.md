@@ -6,7 +6,7 @@ Lis ce fichier en entier avant de toucher au code. Les détails sont dans :
 - `docs/STRATEGIE.md` : planning, règles de score, priorités ;
 - `docs/ETAT.md` : l'état courant du travail. Lis-le au début, mets-le à jour à la fin ;
 - **`docs/TACHE_1_watermark.md`, `docs/TACHE_2_model_equality.md`, `docs/TACHE_3_unlearning.md` : les vraies tâches, à lire avant de coder** ;
-- `pixelseal/CLAUDE.md`, `met/CLAUDE.md` et `scrub/CLAUDE.md` : le contexte des trois papiers (utile, mais ce ne sont pas les tâches).
+- `archive/` : le code écrit d'après les papiers avant de connaître les tâches. **Ne pas l'utiliser** (voir `archive/README.md`).
 
 ## Le contexte
 
@@ -36,29 +36,9 @@ GPU 0 et 3 : libres pour les balayages et les entraînements longs (décision en
 
 ## L'arborescence
 
-```
-CLAUDE.md                  ce fichier
-docs/                      CLUSTER.md, STRATEGIE.md, ETAT.md
-common/scores.py           log_score(...) ; python -m common.scores [--bas met]
-common/dashboard.py        python -m common.dashboard -> $DIR/dashboard.html (à côté de scores.csv)
-common/smoke_test.py       test de fumée GPU (lancé par slurm/test.sh)
-setup/                     install_env.sh, download_all.sh, install_pixelseal.sh (nœud de login)
-slurm/env.sh               variables communes : DIR, MODEL_PATH, IMAGES, HF_HUB_OFFLINE=1
-slurm/test.sh              job de test de 10 minutes
-slurm/noeud.sh             job du titulaire : garde le nœud, une file d'attente par GPU (worker.sh)
-slurm/soumettre.sh         déposer une commande dans la file d'un GPU
-slurm/file.sh, annuler.sh  état des files ; arrêter la commande en cours
-slurm/vague.sh, shell.sh   secours (titulaire seulement)
-setup/partage.sh           crée les files, accès ACL de l'équipe (une fois) ; ajouter_membre.sh pour un retardataire
-setup/fermer.sh            ferme le dossier OFFICIEL aux autres équipes (ACL)
-pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = la baseline complète
-watermark/baseline.py      tâche 1 réelle (fenêtres décodées, U-Net)
-met/analyse.py             tâche 2 réelle (API, nœud de login)
-unlearning/unlearn.py      tâche 3 réelle (baseline ViT)
-logs/                      sorties des jobs (non versionnées)
-```
+Voir `README.md`. L'essentiel : `watermark/baseline.py`, `met/analyse.py`, `unlearning/unlearn.py` (une baseline par tâche), `slurm/` (files d'attente des GPU), `common/scores.py` (journal partagé), `docs/` (tâches, cluster, état). `archive/` : ne pas utiliser.
 
-Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$DIR`) : `env/`, `models/`, `data/`, `ckpts/`, `repos/` et `hf_cache/`. Le dépôt contient seulement un lien symbolique `ckpts`, qui pointe vers `$DIR/ckpts`. Chaque membre a son clone dans `$DIR/membres/<identifiant>/`. Les files d'attente sont dans `$DIR/queue/`, le journal des scores dans `$DIR/scores.csv`.
+Deux dossiers sur le cluster : `$DIR` = `/p/project1/training2666/team_Epi84` (files `queue/`, clones `membres/<id>/depot`, `scores.csv`) et `$OFFICIEL` = `/p/scratch/training2666/huang25/Epi84` (données et un `.venv` par tâche).
 
 ## Qui lance les jobs
 
@@ -82,13 +62,13 @@ Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$D
 
 ## Ce qui a été testé
 
-- **Testé, sans GPU :** `common/scores.py` (écritures simultanées), `common/dashboard.py`, `met/mmd_test.py` et `met/compare.py` (taux de faux positifs de 5 % sous H0 sur données synthétiques), et toute la chaîne SCRUB sur données factices (`--fake`).
-- **Vérifié à blanc**, sans GPU, avec un faux `python` : l'enchaînement des `run.sh` et les gardes des scripts Slurm.
-- **Jamais exécuté** (ni GPU ni poids disponibles pendant la préparation) : `pixelseal/quickstart.py`, `met/generate_vllm.py`, `met/generate_hf.py`, `slurm/shell.sh`, et les jobs Slurm sur la vraie machine. Les files d'attente (`noeud.sh`, `worker.sh`, `soumettre.sh`, `file.sh`, `annuler.sh`) ont été testées sans GPU ni Slurm : dépôt, ordre, annulation, arrêt, reprise. Au premier échec, lis l'erreur avant de réécrire quoi que ce soit.
+- **Sur JURECA :** GPU (4 × A100), files d'attente (`noeud.sh`, `soumettre.sh`, `file.sh`), partage du dossier, `relancer.sh`, le setup officiel.
+- **Sur données factices seulement (`--fake`) :** les trois baselines. Elles n'ont pas encore tourné sur les vraies données : au premier échec, lis le journal avant de réécrire.
+- `met/analyse.py` a été vérifié sur des réponses synthétiques imitant les 9 endpoints de référence.
 
 ## Le style
 
 - Le code, les commentaires et les messages sont en français, comme le reste du dépôt.
-- Les scripts se lancent depuis la racine du dépôt (`python met/compare.py …`) ; ils ajoutent eux-mêmes la racine à `sys.path`.
+- Les scripts se lancent depuis la racine du dépôt (`python met/analyse.py …`) ; ils ajoutent eux-mêmes la racine à `sys.path`.
 - Chaque nouvel hyperparamètre devient une option `argparse` et apparaît dans le `config` passé à `log_score`.
 - Une graine explicite pour tout ce qui est aléatoire.

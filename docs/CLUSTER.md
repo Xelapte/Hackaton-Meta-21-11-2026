@@ -23,7 +23,7 @@ L'accès à GitHub depuis le nœud de login se fait avec une **autre** clé, cr�
 ## Le dossier projet ($DIR)
 
 ```
-$DIR/env/        environnement Python de l'équipe (setup/install_env.sh)
+$DIR/env/        ancien environnement Python (vLLM) : les tâches utilisent les venvs officiels
 $DIR/repos/      dépôts officiels : videoseal, model-equality-testing, SCRUB
 $DIR/ckpts/      poids de Pixel Seal (pixelseal_checkpoint.pth, videoseal_y_256b_img.pth)
 $DIR/models/     modèle de langage pour MET (hf download)
@@ -34,20 +34,11 @@ $DIR/queue/      files d'attente des GPU (gpu0 … gpu3) et leurs journaux (logs
 $DIR/scores.csv  journal des scores de toute l'équipe
 ```
 
-## L'installation, sur le nœud de login uniquement
+## L'installation (faite le 21/11)
 
-```bash
-# d'abord : remplir DIR dans slurm/env.sh (#SBATCH déjà rempli : training2666, dc-gpu, cispahack)
-bash setup/install_env.sh                           # modules JSC (Stages/2025 GCC Python) + venv
-source slurm/env.sh                                 # modules, venv et variables
-hf auth login                                       # accès Llama ou Mistral accordé sur le site
-bash setup/download_all.sh <dossier_projet> <modele_hf>
-bash setup/install_pixelseal.sh <dossier_projet>
-ln -s <dossier_projet>/ckpts ckpts                  # à la racine du dépôt
-bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # files d'attente, accès réservé à l'équipe (ACL)
-sbatch slurm/test.sh                                # titulaire : test de fumée (logs/test-<id>.out)
-sbatch slurm/noeud.sh                               # titulaire : garde le nœud, ouvre les files
-```
+- Setup officiel : `source ~/hackathon_setup.sh` (titulaire), `source teammate.sh` (chaque membre), avec `TEAM_LEAD="huang25"`, `TEAM_FOLDER="Epi84"`. Données et venvs dans `$OFFICIEL`.
+- Tâche 1 : starter kit et venv construits à la main (voir `docs/TACHE_1_watermark.md`).
+- Dossier d'équipe `$DIR` et files : `setup/partage.sh`, puis `sbatch slurm/noeud.sh` et `bash slurm/relancer.sh` (titulaire).
 
 ## Lancer sur les GPU : les files d'attente
 
@@ -67,7 +58,7 @@ ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --e
 **À chaque run**, depuis la racine de ton clone, sur le nœud de login :
 
 ```bash
-bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : 1 scrub_lr bash scrub/run.sh
+bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : 1 ul_T2 --venv unlearning python unlearning/unlearn.py
 bash slurm/file.sh                                        # état des 4 files
 tail -f $DIR/queue/logs/<nom affiché>.log                  # suivre le run (chemin affiché par soumettre.sh)
 bash slurm/annuler.sh <gpu>                               # arrêter la commande en cours
@@ -85,7 +76,6 @@ Le fonctionnement des files :
 
 Les files ont été testées sans GPU : dépôt, ordre, annulation, arrêt, reprise après interruption. Elles restent à valider sur la vraie machine. Les solutions de secours :
 
-- `sbatch slurm/vague.sh`, lancé par le titulaire, exécute le `run.sh` de chaque tâche ;
 - `slurm/shell.sh`, pour le titulaire seulement, ouvre un terminal dans son propre job.
 
 La machine est JURECA-DC : compte `training2666`, partition `dc-gpu`, réservation `cispahack` (jusqu'au 22/11 14h). Ces valeurs sont déjà dans les lignes `#SBATCH`.
