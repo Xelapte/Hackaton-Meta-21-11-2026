@@ -1,16 +1,15 @@
 # Kit pré-hackathon (v2)
 
-Dépôt d'équipe pour le hackathon : trois tâches obligatoires, chacune notée par les tests du jury.
+Dépôt d'équipe pour le hackathon : trois tâches obligatoires, notées par le serveur des organisateurs. **Les vraies tâches sont dans `docs/TACHE_*.md`** ; `pixelseal/`, `met/` et `scrub/` donnent le contexte des papiers.
 
-| Tâche | Papier | Dossier | GPU |
-|---|---|---|---|
-| Tatouage d'images | Pixel Seal (arXiv 2512.16874) | `pixelseal/` | 2 |
-| Audit d'API de modèles de langage | Model Equality Testing (arXiv 2410.20247) | `met/` | 0 |
-| Désapprentissage (machine unlearning) | SCRUB (arXiv 2302.09880) | `scrub/` | 1 |
+| Tâche | Ce qu'on rend | Score | Code du kit | Où ça tourne |
+|---|---|---|---|---|
+| 1. Localiser le tatouage | carte 128×128 par image | mIoU | — (à écrire, `docs/TACHE_1_watermark.md`) | file GPU 2 |
+| 2. Model Equality : 33 endpoints | CSV `endpoint,family,model` | 0,1 MCC famille + 0,9 MCC modèle | `met/analyse.py` | nœud de login (API, CPU) |
+| 3. Unlearning : ViT-B/16 | `state_dict` (.pt) | forget × retain, 0 si précision < 70 % | `unlearning/unlearn.py` | file GPU 1 |
 
-Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le garde pour la démo.
+GPU 0 et 3 : balayages et entraînements longs (décision en équipe). Le dossier officiel `$OFFICIEL` (données + un `.venv` par tâche) est fixé dans `slurm/env.sh` ; dans une file : `bash slurm/soumettre.sh <gpu> <nom> --venv unlearning|met|watermark <commande>`. Clé d'API d'équipe : jamais dans git (`TEAM_API_KEY`).
 
----
 
 ## La règle n°1 : tout se fait sur le nœud de login, rien en local
 
@@ -111,6 +110,7 @@ L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version
 | `met/mmd_test.py` | Le cœur statistique : le noyau de Hamming, la MMD sans biais calculée prompt par prompt, et le test de permutation `mmd_test(...)`. Testé : 5 % de faux positifs sous H0. |
 | `met/generate_vllm.py` | Génère les réponses de référence (P) avec vLLM, en fp32, fp16 ou bf16. Une graine différente est obligatoire pour chaque fichier. |
 | `met/generate_hf.py` | Génère les variantes à détecter (Q) avec transformers : `int8`, `nf4`, `watermark`, `fp16` ou `fp32`. |
+| `met/analyse.py` | **Tâche 2 réelle** : similarité entre endpoints, regroupement en familles/modèles, CSV de soumission. Tourne sur le nœud de login (API). |
 | `met/compare.py` | Compare deux échantillons (`.npz` de tokens ou `.json` de textes) et écrit la p-value comme score. Plus bas = différence détectée. |
 | `met/prompts_exemple.jsonl` | Le format des prompts : une ligne `{"id": "...", "text": "..."}` par prompt. |
 | `met/run.sh` | La baseline complète, à déposer dans la file du GPU 0 (`bash slurm/soumettre.sh 0 base bash met/run.sh`) : P et P' (contrôle), Q pour nf4, int8 et watermark, puis toutes les comparaisons. |
@@ -129,6 +129,7 @@ L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à u
 | `scrub/train_original.py` | Entraîne le modèle original, ou le modèle réentraîné sans le forget set (`--retrain`), qui sert de référence. |
 | `scrub/run_scrub.py` | Applique SCRUB et SCRUB+R, mesure les erreurs (test, retain, forget) et la MIA, puis écrit le score : l'erreur sur le forget set. À adapter à la métrique du jury. |
 | `scrub/run.sh` | La baseline complète, à déposer dans la file du GPU 1 (`bash slurm/soumettre.sh 1 base bash scrub/run.sh`) : l'original et le réentraînement en parallèle, puis SCRUB en mode classe et en mode sélectif. |
+| `unlearning/unlearn.py` | **Tâche 3 réelle** : baseline de désapprentissage (ViT, sans retain set). `--venv unlearning`. |
 | `scrub/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier (tableau 3), pièges et leviers. |
 
 Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
@@ -150,6 +151,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
 | `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/`, ferme le dossier projet au groupe Unix (commun à toutes les équipes) et l'ouvre aux seuls membres listés par ACL (`setfacl`). Une fois, par le titulaire, avec les identifiants JuDoor de tous les membres. |
 | `setup/ajouter_membre.sh` | Ouvre le dossier à un membre arrivé après `partage.sh` : `bash setup/ajouter_membre.sh <dossier_projet> <identifiant>`. Chaque membre déjà présent la lance une fois, pour ses propres fichiers. |
+| `setup/fermer.sh` | Ferme le dossier OFFICIEL (créé par `hackathon_setup.sh`) aux autres équipes. |
 | `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : accès ACL, dossier fermé aux autres équipes, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
 
 ### Lancement sur les GPU : `slurm/` (les files d'attente)

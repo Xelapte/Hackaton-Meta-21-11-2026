@@ -1,11 +1,12 @@
 #!/bin/bash
 # À lancer sur le NŒUD DE LOGIN (il a internet ; les nœuds de calcul n'en ont pas),
 # avec l'environnement de l'équipe activé.
-# Usage : bash setup/download_all.sh <dossier_projet> <modele_hugging_face>
-#   ex. : bash setup/download_all.sh $DOSSIER <organisation>/<modele-instruct>
+# Usage : bash setup/download_all.sh <dossier_projet> [<modele_hugging_face>]
+# Le modèle est facultatif : la tâche 2 réelle passe par une API (pas de modèle local).
+# Les données des tâches viennent de hackathon_setup.sh (organisateurs), pas d'ici.
 set -euo pipefail
 DIR=${1:?"usage : bash setup/download_all.sh <dossier_projet> <modele_hf>"}
-MODEL=${2:?"indiquez le modèle Hugging Face à télécharger"}
+MODEL=${2:-}
 export HF_HOME="$DIR/hf_cache"
 mkdir -p "$DIR/data" "$DIR/repos" "$DIR/models" "$DIR/ckpts" "$HF_HOME"
 
@@ -35,10 +36,14 @@ for train in (True, False):
 print("CIFAR ok")
 EOF
 
-echo "== 4/4 Modèle de langage (Model Equality Testing) : $MODEL"
-DEST="$DIR/models/$(basename "$MODEL")"
-hf download "$MODEL" --local-dir "$DEST" || \
-    huggingface-cli download "$MODEL" --local-dir "$DEST"
+if [ -n "$MODEL" ]; then
+    echo "== 4/4 Modèle de langage : $MODEL"
+    DEST="$DIR/models/$(basename "$MODEL")"
+    hf download "$MODEL" --local-dir "$DEST" || \
+        huggingface-cli download "$MODEL" --local-dir "$DEST"
+else
+    echo "== 4/4 Pas de modèle de langage demandé : étape sautée"
+fi
 
 echo "Terminé. Dans la racine du dépôt d'équipe : ln -s $DIR/ckpts ckpts"
 du -sh "$DIR"/{data,models,repos,ckpts} 2>/dev/null || true

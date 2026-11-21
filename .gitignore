@@ -23,3 +23,9 @@ logs/*
 # Secrets
 .env
 *token*
+# Clés d'API des organisateurs : jamais dans git
+*api_key*
+*API_KEY*
+.env*
+answers.jsonl
+reference_answers.jsonl
