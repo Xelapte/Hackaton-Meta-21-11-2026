@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(/p/scratch/training2666/huang25/Epi84/*/.venv/bin/python *)",
+      "Bash(source slurm/env.sh)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(source $VENV_WATERMARK/bin/activate)",
+      "Bash(source $VENV_MET/bin/activate)",
+      "Bash(source $VENV_UNLEARNING/bin/activate)",
+      "Bash(source /p/scratch/training2666/huang25/Epi84/*/.venv/bin/activate)",
+      "Bash(bash slurm/soumettre.sh *)",
+      "Bash(bash slurm/file.sh)",
+      "Bash(bash slurm/file.sh *)"
+    ],
+    "deny": [
+      "Bash(sbatch *)",
+      "Bash(salloc *)",
+      "Bash(scancel *)",
+      "Bash(python submission.py*)",
+      "Bash(python submission_template.py*)",
+      "Bash(python3 submission.py*)",
+      "Bash(python3 submission_template.py*)"
+    ]
+  }
+}
