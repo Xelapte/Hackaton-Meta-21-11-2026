@@ -3,6 +3,8 @@
 Squelette de dépôt d'équipe et scripts de préparation (fiches 5 à 8).
 
 ```
+CLAUDE.md                 guide pour les agents (lire en premier), + un CLAUDE.md par tâche
+docs/                     CLUSTER.md, STRATEGIE.md, ETAT.md (état courant, à tenir à jour)
 common/smoke_test.py      test de fumée GPU (lancé par slurm/test.sh)
 common/scores.py          journal des scores : log_score(...) et python -m common.scores
 common/dashboard.py       page HTML statique des scores : python -m common.dashboard
