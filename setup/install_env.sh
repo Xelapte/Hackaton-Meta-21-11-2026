@@ -1,9 +1,12 @@
 #!/bin/bash
 # À lancer sur le NŒUD DE LOGIN (il a internet), une seule fois pour toute l'équipe.
-# Avant : chargez les modules Python / CUDA recommandés par les organisateurs.
-# Usage : bash setup/install_env.sh <dossier_projet>
-set -euo pipefail
-DIR=${1:?"usage : bash setup/install_env.sh <dossier_projet>"}
+# Avant : remplissez DIR dans slurm/env.sh. Depuis la racine du dépôt :
+#   bash setup/install_env.sh
+# Charge les modules de slurm/env.sh (même Python que sur les nœuds GPU), puis crée le venv.
+set -eo pipefail
+source slurm/env.sh || exit 1
+set -u
+python3 --version
 
 python3 -m venv "$DIR/env"
 source "$DIR/env/bin/activate"

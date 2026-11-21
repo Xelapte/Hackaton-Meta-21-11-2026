@@ -4,7 +4,10 @@
 export DIR="<dossier_projet>"                     # ex. /p/project1/training2666/<nom_equipe>
 case "$DIR" in "<"*) echo "Remplacez <dossier_projet> dans slurm/env.sh"
                      return 1 2>/dev/null || exit 1;; esac
-source "$DIR/env/bin/activate"
+# Modules JSC : le même Python sur le login et sur les nœuds GPU (vérifier : module spider Python)
+export MODULES="Stages/2025 GCC Python"
+module load $MODULES 2>/dev/null || echo "Attention : module load $MODULES a échoué (voir module spider Python)"
+[ -f "$DIR/env/bin/activate" ] && source "$DIR/env/bin/activate"
 export HF_HOME="$DIR/hf_cache"
 export HF_HUB_OFFLINE=1                           # pas d'internet sur les nœuds de calcul
 export SCORES_CSV="$DIR/scores.csv"               # journal des scores commun à toute l'équipe

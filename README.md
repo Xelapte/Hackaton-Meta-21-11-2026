@@ -50,13 +50,13 @@ Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) 
 
 ```bash
 ssh jsc
-bash setup/install_env.sh <dossier_projet>          # 1. environnement Python
-source <dossier_projet>/env/bin/activate            # 2. l'activer
+# 0. remplir DIR dans slurm/env.sh (les lignes #SBATCH sont déjà remplies)
+bash setup/install_env.sh                           # 1. environnement Python (modules JSC + venv)
+source slurm/env.sh                                 # 2. l'activer (modules, venv, variables)
 hf auth login                                       #    si le modèle demande un accès (Llama, Mistral)
 bash setup/download_all.sh <dossier_projet> <modele_hf>   # 3. dépôts, poids, CIFAR, modèle
 bash setup/install_pixelseal.sh <dossier_projet>    # 4. bibliothèque videoseal
 bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # 5. files d'attente, accès réservé à l'équipe (ACL)
-# 6. remplir DIR dans slurm/env.sh (les lignes #SBATCH sont déjà remplies)
 sbatch slurm/test.sh                                # 7. test de fumée : lire logs/test-<id>.out
 sbatch slurm/noeud.sh                               # 8. garde le nœud, ouvre les 4 files
 bash slurm/relancer.sh                              # 9. programme la relève (à refaire à chaque nouveau job)
@@ -145,7 +145,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 
 | Fichier | Rôle |
 |---|---|
-| `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…). |
+| `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…), avec le Python des modules JSC chargés par `slurm/env.sh` (le même que sur les nœuds GPU). Lit `DIR` dans `slurm/env.sh` : à remplir avant. |
 | `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
 | `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/`, ferme le dossier projet au groupe Unix (commun à toutes les équipes) et l'ouvre aux seuls membres listés par ACL (`setfacl`). Une fois, par le titulaire, avec les identifiants JuDoor de tous les membres. |
@@ -156,7 +156,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 
 | Fichier | Rôle |
 |---|---|
-| `slurm/env.sh` | Les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, `SCORES_CSV`, mode hors ligne `HF_HUB_OFFLINE=1`, `umask 002`). **À remplir une fois.** |
+| `slurm/env.sh` | Les modules JSC (`Stages/2025 GCC Python`), le venv et les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, `SCORES_CSV`, mode hors ligne `HF_HUB_OFFLINE=1`, `umask 002`). **À remplir une fois.** |
 | `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi`, `smoke_test.py`, puis vérifie que le nœud GPU voit et modifie le dossier projet. À lancer en premier, par le titulaire. |
 | `slurm/noeud.sh` | **Le job du titulaire** : garde le nœud et lance un `worker.sh` par GPU. Arrêt propre : `touch $DIR/queue/STOP`. |
 | `slurm/worker.sh` | Exécute une par une, dans l'ordre de dépôt, les commandes de la file d'un GPU (`attente/` → `en_cours/` → `fini/`). Lancé par `noeud.sh`, jamais à la main. |

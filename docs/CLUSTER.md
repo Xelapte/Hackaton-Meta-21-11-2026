@@ -37,14 +37,14 @@ $DIR/scores.csv  journal des scores de toute l'équipe
 ## L'installation, sur le nœud de login uniquement
 
 ```bash
-bash setup/install_env.sh <dossier_projet>
-source <dossier_projet>/env/bin/activate
+# d'abord : remplir DIR dans slurm/env.sh (#SBATCH déjà rempli : training2666, dc-gpu, cispahack)
+bash setup/install_env.sh                           # modules JSC (Stages/2025 GCC Python) + venv
+source slurm/env.sh                                 # modules, venv et variables
 hf auth login                                       # accès Llama ou Mistral accordé sur le site
 bash setup/download_all.sh <dossier_projet> <modele_hf>
 bash setup/install_pixelseal.sh <dossier_projet>
 ln -s <dossier_projet>/ckpts ckpts                  # à la racine du dépôt
 bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # files d'attente, accès réservé à l'équipe (ACL)
-# puis remplir DIR dans slurm/env.sh (#SBATCH déjà rempli : training2666, dc-gpu, cispahack)
 sbatch slurm/test.sh                                # titulaire : test de fumée (logs/test-<id>.out)
 sbatch slurm/noeud.sh                               # titulaire : garde le nœud, ouvre les files
 ```
