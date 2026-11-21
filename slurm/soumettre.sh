@@ -4,9 +4,7 @@
 #   bash slurm/soumettre.sh <gpu> <nom_court> [--venv unlearning|met|watermark] <commande...>
 #   --venv : exécute la commande dans le .venv officiel de cette tâche (dossier OFFICIEL)
 #   ex. : bash slurm/soumettre.sh 1 ul_test --venv unlearning python unlearning/mon_script.py
-#   ex. : bash slurm/soumettre.sh 1 scrub_base bash scrub/run.sh
-#         bash slurm/soumettre.sh 0 smoke python met/generate_vllm.py --model "$MODEL_PATH" \
-#               --prompts met/prompts_exemple.jsonl --n 3 --max_tokens 20 --seed 1 --out results/met/s.npz
+#   ex. : bash slurm/soumettre.sh 2 wm_window --venv watermark python watermark/baseline.py --mode window
 # La commande s'exécute dans votre clone, avec slurm/env.sh chargé et CUDA_VISIBLE_DEVICES
 # fixé. Les fichiers qu'elle lance sont lus au démarrage, pas au dépôt.
 # Petit test (< 30 min, votre GPU) : libre. Run long ou de nuit : annoncé à l'équipe.

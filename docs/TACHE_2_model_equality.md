@@ -41,4 +41,6 @@ Dossier officiel : `$OFFICIEL/model_equality/` (venv : `--venv met`). Fichiers f
 - **Prompts discriminants** : réponses longues et factuelles (connaissances, code, raisonnement), consignes de format précises. Le style change avec le prompt système et la persona, pas les connaissances ni les tics du modèle.
 - **Les pièges « même modèle »** (persona, prompt système, tatouage, température) changent beaucoup le texte : une similarité de surface les sépare à tort. Testez des caractéristiques robustes au style : contenu factuel, nombres, structure, longueur relative.
 - **Les pièges « modèle différent »** (fp8, LoRA 0,3) changent peu le texte : il faut des prompts où de petites différences de poids changent la réponse (questions difficiles, longues générations).
-- Le test MMD du papier (`met/mmd_test.py`, fiches 2 et 7) s'applique si vous avez plusieurs réponses par prompt (répétitions).
+- Le test MMD du papier (`met/mmd_test.py`, fiche 2) s'applique si vous avez plusieurs réponses par prompt (répétitions).
+- **Ne pas régler sur le score public** : il ne couvre qu'une partie des paires, et les organisateurs préviennent qu'un réglage sur ce score peut s'effondrer au classement final. Jugez la méthode sur les endpoints `ref-`.
+- Références citées par les organisateurs : MET (arXiv 2410.20247), RUT, un test d'uniformité par rangs pour auditer une API (2506.06975), AgentProv (2609.00052).

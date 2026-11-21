@@ -1,190 +1,36 @@
-# Kit pré-hackathon (v2)
+# Dépôt de l'équipe Epi84 — European AI Championship, Paris (21–22/11)
 
-Dépôt d'équipe pour le hackathon : trois tâches obligatoires, notées par le serveur des organisateurs. **Les vraies tâches sont dans `docs/TACHE_*.md`** ; `pixelseal/`, `met/` et `scrub/` donnent le contexte des papiers.
-
-| Tâche | Ce qu'on rend | Score | Code du kit | Où ça tourne |
-|---|---|---|---|---|
-| 1. Localiser le tatouage | carte 128×128 par image | mIoU | `watermark/baseline.py` | file GPU 2 |
-| 2. Model Equality : 33 endpoints | CSV `endpoint,family,model` | 0,1 MCC famille + 0,9 MCC modèle | `met/analyse.py` | nœud de login (API, CPU) |
-| 3. Unlearning : ViT-B/16 | `state_dict` (.pt) | forget × retain, 0 si précision < 70 % | `unlearning/unlearn.py` | file GPU 1 |
-
-GPU 0 et 3 : balayages et entraînements longs (décision en équipe). Le dossier officiel `$OFFICIEL` (données + un `.venv` par tâche) est fixé dans `slurm/env.sh` ; dans une file : `bash slurm/soumettre.sh <gpu> <nom> --venv unlearning|met|watermark <commande>`. Clé d'API d'équipe : jamais dans git (`TEAM_API_KEY`).
-
-
-## La règle n°1 : tout se fait sur le nœud de login, rien en local
-
-**On n'installe et on ne lance RIEN sur nos ordinateurs personnels** : ni `pip install`, ni modèle, ni poids, ni données, ni script Python.
-
-| Où | Ce qu'on y fait |
-|---|---|
-| **Ordinateur perso** | **Terminal SSH seulement** : `ssh jsc`, rien d'autre. On n'y édite même pas le code. |
-| **Nœud de login** (`ssh jsc`) | **Tout le reste** : ton clone du dépôt (dans `$DIR/membres/<identifiant>/`), où tu modifies, testes et pousses le code (`git pull`, `git push`), installations, téléchargements (`pip`, `wget`, `hf download`, jeux de données), et le dépôt de tes commandes dans les files des GPU (`slurm/soumettre.sh`). |
-| **Nœuds GPU** | L'exécution des commandes des files, dans le job du titulaire. On ne s'y connecte pas. **Ils n'ont pas internet** : un téléchargement y fait planter le script. |
-
-Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est partagé avec tout le centre. Tout ce qui utilise un GPU passe par les files d'attente (`slurm/soumettre.sh`).
-
-### Qui lance les jobs : le titulaire du nœud
-
-- **Un seul membre, le titulaire du nœud**, porte le job sur son compte : `sbatch slurm/noeud.sh`. Ce job garde le nœud (4 GPU) et ouvre **une file d'attente par GPU**. Son seul rôle régulier : programmer la relève dès le début avec `bash slurm/relancer.sh`. Le job suivant démarre automatiquement à la fin du précédent, donc jamais deux nœuds payés en même temps. Il est le seul à lancer des jobs Slurm : un deuxième job consommerait un deuxième nœud et doublerait le budget.
-- **Chaque membre a son propre compte et sa propre clé SSH.** Slurm ne laisse entrer dans un job que la personne qui l'a lancé : les autres ne se connectent donc jamais au nœud GPU. Ils **déposent leurs commandes** dans la file de leur GPU depuis le nœud de login, et la file les exécute une par une.
-- **Le relais de nuit**, à tour de rôle, prend le relais quand le titulaire dort : si le job s'arrête, il relance `slurm/noeud.sh` sous son propre compte. Les commandes en attente ne sont pas perdues.
-- **Les petits tests sont libres** : une commande de moins de 30 minutes, dans la file du GPU de sa tâche, dont on suit le journal.
-- **Les runs longs ou de nuit et les gros téléchargements s'annoncent** sur le canal d'équipe, avec leur durée. Ils partent si personne n'objecte dans les 5 minutes. Chacun les inscrit dans le tableau « Ce qui tourne » de `docs/ETAT.md`.
-- **Le GPU 3 (joker) et les soumissions officielles se décident en équipe**, aux points d'équipe.
-- **On n'annule jamais la commande d'un autre membre** sans lui. La sienne, on peut l'annuler librement.
-- Les noms du titulaire et du relais de nuit sont notés dans `docs/ETAT.md`, section « Qui tient le nœud ».
+Agents : lisez d'abord `CLAUDE.md`. Humains : fiches 9 (tuto), 11 (rejoindre l'équipe), 12 (scripts), 6 à 8 (tâches).
 
 ```
-ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --exécute--> nœud GPU, GPU N
-                         (ton clone)                (dossier partagé)           (job slurm/noeud.sh du titulaire)  
+CLAUDE.md                 guide des agents (règles, contexte, cycle de travail)
+docs/TACHE_1_watermark.md       tâche 1 : localiser le tatouage (mIoU)
+docs/TACHE_2_model_equality.md  tâche 2 : 33 endpoints d'API, familles et modèles (MCC)
+docs/TACHE_3_unlearning.md      tâche 3 : désapprendre 3 500 images d'un ViT
+docs/CLUSTER.md, STRATEGIE.md, ETAT.md   machines et files ; stratégie ; état courant (à tenir à jour)
+
+watermark/baseline.py     tâche 1 : --mode window (décodage par fenêtres) et --mode unet (segmentation)
+met/analyse.py            tâche 2 : similarité entre endpoints, familles/modèles, CSV de soumission
+met/mmd_test.py           test MMD du papier (si plusieurs réponses par prompt)
+unlearning/unlearn.py     tâche 3 : distillation vers des prédictions adoucies + ancre L2
+
+slurm/env.sh              variables communes : DIR (files, clones, scores), OFFICIEL (données, venvs)
+slurm/soumettre.sh        déposer une commande dans la file d'un GPU (--venv unlearning|met|watermark)
+slurm/file.sh             état des 4 files ; slurm/annuler.sh : arrêter la commande en cours
+slurm/noeud.sh            job du titulaire : garde le nœud, une file par GPU (worker.sh)
+slurm/relancer.sh         titulaire : programme la relève du job
+slurm/test.sh, shell.sh   test de fumée ; terminal de secours (titulaire)
+setup/ajouter_membre.sh   ouvrir le dossier d'équipe à un membre
+setup/verif_partage.sh    chaque membre : vérifier ses accès (PARTAGE OK)
+setup/partage.sh, fermer.sh  créer/fermer un dossier d'équipe (déjà fait)
+setup/nettoyer_depot.sh   une fois par clone : retire les anciens fichiers passés dans archive/
+common/scores.py          journal des scores partagé : python -m common.scores
+common/dashboard.py       tableau de bord HTML des scores
+
+archive/                  code de préparation écrit d'après les papiers (avant de connaître les vraies
+                          tâches) : ne plus l'utiliser, voir archive/README.md
 ```
 
-Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) vivent dans le dossier projet du cluster (`$DIR`), jamais dans le dépôt. On y trouve aussi les clones des membres (`$DIR/membres/`), les files d'attente (`$DIR/queue/`) et **le journal des scores partagé** (`$DIR/scores.csv`).
-
----
-
-## L'installation (sur le nœud de login)
-
-**Une seule fois pour l'équipe, par le titulaire du nœud**, depuis la racine de son clone :
-
-```bash
-ssh jsc
-# 0. remplir DIR dans slurm/env.sh (les lignes #SBATCH sont déjà remplies)
-bash setup/install_env.sh                           # 1. environnement Python (modules JSC + venv)
-source slurm/env.sh                                 # 2. l'activer (modules, venv, variables)
-hf auth login                                       #    si le modèle demande un accès (Llama, Mistral)
-bash setup/download_all.sh <dossier_projet> <modele_hf>   # 3. dépôts, poids, CIFAR, modèle
-bash setup/install_pixelseal.sh <dossier_projet>    # 4. bibliothèque videoseal
-bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # 5. files d'attente, accès réservé à l'équipe (ACL)
-sbatch slurm/test.sh                                # 7. test de fumée : lire logs/test-<id>.out
-sbatch slurm/noeud.sh                               # 8. garde le nœud, ouvre les 4 files
-bash slurm/relancer.sh                              # 9. programme la relève (à refaire à chaque nouveau job)
-```
-
-**Chaque membre, une fois**, sur le nœud de login :
-
-```bash
-echo 'umask 002' >> ~/.bashrc                       # fichiers modifiables par toute l'équipe
-mkdir -p <dossier_projet>/membres/$USER && cd <dossier_projet>/membres/$USER
-git clone git@github.com:Xelapte/Hackaton-Meta-21-11-2026.git && cd Hackaton-Meta-21-11-2026
-ln -s <dossier_projet>/ckpts ckpts                  # lien vers les poids de Pixel Seal
-# remplir slurm/env.sh (mêmes valeurs que le titulaire)
-bash setup/verif_partage.sh                         # doit afficher « PARTAGE OK »
-```
-
-**À chaque run**, depuis la racine de ton clone :
-
-```bash
-bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : bash slurm/soumettre.sh 1 scrub_base bash scrub/run.sh
-bash slurm/file.sh                                        # état des 4 files
-tail -f $DIR/queue/logs/<nom affiché>.log                  # suivre le run (chemin affiché par soumettre.sh)
-bash slurm/annuler.sh <gpu>                               # arrêter TA commande en cours (jamais celle d'un autre)
-source slurm/env.sh && python -m common.scores            # meilleurs scores de l'équipe
-```
-
-Une file exécute une commande à la fin de la précédente. Pour plusieurs runs en parallèle sur un GPU, mets-les dans un même script avec `&` puis `wait`. Ne modifie pas un script en attente ou en cours : il est lu au démarrage.
-
----
-
-## Le squelette, tâche par tâche
-
-### Pixel Seal : tatouage d'images (GPU 2)
-
-L'objectif : cacher un message de 256 bits dans une image, puis le relire même après des attaques (JPEG, recadrage, flou…). Le compromis : un tatouage plus fort est plus robuste mais plus visible.
-
-| Fichier | Rôle |
-|---|---|
-| `pixelseal/smoke_test.py` | Le test de fumée de la tâche : vérifie que les poids sont lus dans `ckpts/` sans téléchargement, et que le message est relu sur une image non attaquée. `bash slurm/soumettre.sh 2 smoke python pixelseal/smoke_test.py`. |
-| `pixelseal/quickstart.py` | La baseline. Tatoue N images, applique 6 attaques, relit le message, puis calcule le PSNR (qualité d'image), le taux de bits justes et la p-value. Le score est le taux moyen de bits justes sous attaque. À adapter à la métrique du jury. |
-| `pixelseal/run.sh` | La baseline complète, à déposer dans la file du GPU 2 (`bash slurm/soumettre.sh 2 base bash pixelseal/run.sh`) : `quickstart.py` avec trois forces de tatouage (`--scaling_w` 0,2, 0,3 et 0,4) en parallèle. |
-| `watermark/baseline.py` | **Tâche 1 réelle** : localisation du tatouage (fenêtres décodées `--mode window`, puis U-Net `--mode unet`), soumission `.pt`. `--venv watermark`, GPU 2. |
-| `pixelseal/CLAUDE.md` | Le guide de la tâche : principe, API de videoseal, pièges et leviers d'amélioration. |
-
-Il a besoin de `IMAGES` (le dossier des images de test, connu à 12h) et du lien `ckpts` à la racine du dépôt.
-
-### MET : audit d'API de modèles de langage (GPU 0)
-
-L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version modifiée (quantifiée, tatouée…). On utilise un test statistique à deux échantillons : la MMD avec un noyau de Hamming, et une p-value obtenue par permutation.
-
-| Fichier | Rôle |
-|---|---|
-| `met/mmd_test.py` | Le cœur statistique : le noyau de Hamming, la MMD sans biais calculée prompt par prompt, et le test de permutation `mmd_test(...)`. Testé : 5 % de faux positifs sous H0. |
-| `met/generate_vllm.py` | Génère les réponses de référence (P) avec vLLM, en fp32, fp16 ou bf16. Une graine différente est obligatoire pour chaque fichier. |
-| `met/generate_hf.py` | Génère les variantes à détecter (Q) avec transformers : `int8`, `nf4`, `watermark`, `fp16` ou `fp32`. |
-| `met/analyse.py` | **Tâche 2 réelle** : similarité entre endpoints, regroupement en familles/modèles, CSV de soumission. Tourne sur le nœud de login (API). |
-| `met/compare.py` | Compare deux échantillons (`.npz` de tokens ou `.json` de textes) et écrit la p-value comme score. Plus bas = différence détectée. |
-| `met/prompts_exemple.jsonl` | Le format des prompts : une ligne `{"id": "...", "text": "..."}` par prompt. |
-| `met/run.sh` | La baseline complète, à déposer dans la file du GPU 0 (`bash slurm/soumettre.sh 0 base bash met/run.sh`) : P et P' (contrôle), Q pour nf4, int8 et watermark, puis toutes les comparaisons. |
-| `met/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier et pièges (graines, gabarit de chat, décodage, mémoire). |
-
-Il a besoin de `MODEL_PATH` (le modèle téléchargé par `download_all.sh`). On lit le meilleur score avec `python -m common.scores --bas met`.
-
-### SCRUB : désapprentissage (GPU 1)
-
-L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à un modèle déjà entraîné, sans tout réentraîner, et en gardant ses performances sur le reste. On utilise un schéma enseignant–élève : l'élève s'éloigne de l'enseignant sur le forget set et reste proche de lui sur le retain set.
-
-| Fichier | Rôle |
-|---|---|
-| `scrub/cifar.py` | La boîte à outils : ResNet-18 adapté à CIFAR, chargement des données (`--fake` pour tester sans données), découpage forget/retain, entraînement et évaluation. |
-| `scrub/scrub.py` | L'algorithme : SCRUB, SCRUB+R (rembobinage vers le point de sauvegarde le plus proche de la référence) et l'attaque d'appartenance (MIA). |
-| `scrub/train_original.py` | Entraîne le modèle original, ou le modèle réentraîné sans le forget set (`--retrain`), qui sert de référence. |
-| `scrub/run_scrub.py` | Applique SCRUB et SCRUB+R, mesure les erreurs (test, retain, forget) et la MIA, puis écrit le score : l'erreur sur le forget set. À adapter à la métrique du jury. |
-| `scrub/run.sh` | La baseline complète, à déposer dans la file du GPU 1 (`bash slurm/soumettre.sh 1 base bash scrub/run.sh`) : l'original et le réentraînement en parallèle, puis SCRUB en mode classe et en mode sélectif. |
-| `unlearning/unlearn.py` | **Tâche 3 réelle** : baseline de désapprentissage (ViT, sans retain set). `--venv unlearning`. |
-| `scrub/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier (tableau 3), pièges et leviers. |
-
-Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
-
-### Commun aux trois tâches
-
-| Fichier | Rôle |
-|---|---|
-| `common/scores.py` | Le journal des scores. `log_score(tache, config, score, notes)` ajoute une ligne au journal partagé `$DIR/scores.csv` (variable `SCORES_CSV`, fixée dans `slurm/env.sh`). `source slurm/env.sh && python -m common.scores` affiche le meilleur score de chaque tâche. **Un résultat absent du CSV n'existe pas pour l'équipe.** |
-| `common/dashboard.py` | Transforme le journal des scores en une page HTML statique : `python -m common.dashboard` écrit `$DIR/dashboard.html`, à côté du journal partagé. |
-| `common/smoke_test.py` | Le test de fumée GPU : GPU visibles, bf16, vitesse, imports, présence du modèle. Lancé par `slurm/test.sh`. |
-
-### Installation : `setup/` (nœud de login uniquement)
-
-| Fichier | Rôle |
-|---|---|
-| `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…), avec le Python des modules JSC chargés par `slurm/env.sh` (le même que sur les nœuds GPU). Lit `DIR` dans `slurm/env.sh` : à remplir avant. |
-| `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
-| `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
-| `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/`, ferme le dossier projet au groupe Unix (commun à toutes les équipes) et l'ouvre aux seuls membres listés par ACL (`setfacl`). Une fois, par le titulaire, avec les identifiants JuDoor de tous les membres. |
-| `setup/ajouter_membre.sh` | Ouvre le dossier à un membre arrivé après `partage.sh` : `bash setup/ajouter_membre.sh <dossier_projet> <identifiant>`. Chaque membre déjà présent la lance une fois, pour ses propres fichiers. |
-| `setup/fermer.sh` | Ferme le dossier OFFICIEL (créé par `hackathon_setup.sh`) aux autres équipes. |
-| `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : accès ACL, dossier fermé aux autres équipes, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
-
-### Lancement sur les GPU : `slurm/` (les files d'attente)
-
-| Fichier | Rôle |
-|---|---|
-| `slurm/env.sh` | Les modules JSC (`Stages/2025 GCC Python`), le venv et les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, `SCORES_CSV`, mode hors ligne `HF_HUB_OFFLINE=1`, `umask 002`). **À remplir une fois.** |
-| `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi`, `smoke_test.py`, puis vérifie que le nœud GPU voit et modifie le dossier projet. À lancer en premier, par le titulaire. |
-| `slurm/noeud.sh` | **Le job du titulaire** : garde le nœud et lance un `worker.sh` par GPU. Arrêt propre : `touch $DIR/queue/STOP`. |
-| `slurm/worker.sh` | Exécute une par une, dans l'ordre de dépôt, les commandes de la file d'un GPU (`attente/` → `en_cours/` → `fini/`). Lancé par `noeud.sh`, jamais à la main. |
-| `slurm/soumettre.sh` | **Ce que chaque membre utilise** : dépose une commande dans la file d'un GPU, depuis son clone. Elle s'exécute avec `slurm/env.sh` chargé et `CUDA_VISIBLE_DEVICES` fixé. |
-| `slurm/file.sh` | Affiche l'état des 4 files : active ou non, commande en cours, en attente, dernières finies. |
-| `slurm/relancer.sh` | **Titulaire (ou relais de nuit)** : programme la relève du job du nœud. Un nouveau `noeud.sh` démarre dès que l'actuel se termine (`sbatch --dependency=afterany`) : jamais deux nœuds payés, et les commandes en attente passent au job suivant. |
-| `slurm/annuler.sh` | Arrête la commande en cours sur un GPU (la file passe à la suivante). Pour retirer une commande en attente : `rm $DIR/queue/gpuN/attente/<nom>.sh`. |
-| `slurm/vague.sh` | **Secours**, si les files ne marchent pas. Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
-| `slurm/shell.sh` | **Secours, pour le titulaire seulement.** Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Le `<jobid>` est celui de la réservation du titulaire. Non testé. |
-
-### Sorties et documentation
-
-| Fichier ou dossier | Rôle |
-|---|---|
-| `results/` | Sorties locales du clone. Le journal des scores n'y est plus : il est partagé dans `$DIR/scores.csv`. Les grosses sorties (`results/met/`, `results/scrub/`) ne sont pas versionnées. |
-| `logs/` | Les sorties des jobs Slurm (non versionnées). |
-| `CLAUDE.md` | Le guide général pour les agents et les membres : règles absolues, cycle de travail, style. |
-| `docs/CLUSTER.md` | Les machines, la connexion SSH, Slurm, les règles du GPU partagé. |
-| `docs/STRATEGIE.md` | Le planning des 24 h, les principes de score, le fil conducteur du pitch. |
-| `docs/ETAT.md` | L'état courant du travail (meilleurs scores, ce qui tourne, à faire). **À lire en arrivant, à mettre à jour en partant.** |
-
----
-
-## Ce qui a été testé
-
-- **Testé sans GPU :** les files d'attente (dépôt, ordre, annulation, arrêt, reprise), les scores, le tableau de bord, la MMD (`met/compare.py`) et toute la chaîne SCRUB sur données factices (`--fake`).
-- **Vérifié à blanc :** l'enchaînement des `run.sh` et les gardes sur les variables.
-- **Jamais exécuté** (ni GPU ni poids disponibles pendant la préparation) : `pixelseal/quickstart.py`, `met/generate_vllm.py`, `met/generate_hf.py` et `slurm/*.sh`. Au premier échec, lis l'erreur avant de réécrire quoi que ce soit.
+Données et environnements : dossier officiel `$OFFICIEL` (`/p/scratch/training2666/huang25/Epi84`),
+créé par `hackathon_setup.sh` des organisateurs. Les trois baselines ont été testées sur données
+factices (`--fake`) ; elles n'ont pas encore tourné sur les vraies données.
