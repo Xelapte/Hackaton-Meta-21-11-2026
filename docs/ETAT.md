@@ -22,7 +22,7 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 |---|---|---|---|---|
 | Tatouage (mIoU local) | 0,4705 (hors pli, 5 plis) | `--mode unet --feats cartes_feats.npz --folds 5 --aug --epochs 40` (après `--mode cartes`) | 9d78d06 | 17h28 |
 | Tatouage, sans entraînement | 0,4339 (train) | `--mode direct` | 9d78d06 | 17h20 |
-| MET (MCC modèle, ref-) | 0,231 | `met/score_local.py` (LLR SmolLM2-360M base − fp8, seuil z 2) : fp8 repéré, LoRA non séparées | à venir | 20h37 |
+| MET (MCC modèle, ref-) | 0,231 | `met/score_local.py` (LLR SmolLM2-360M base − fp8, seuil z 2) : fp8 repéré, LoRA non séparées | ec720e8 | 20h37 |
 | SCRUB | | | | |
 
 ## Ce qui tourne en ce moment
