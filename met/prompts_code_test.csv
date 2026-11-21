@@ -1,0 +1,3 @@
+id,type,max_tokens,prompt
+A11_code_mots,code,256,Write a Python function that counts how many times each word appears in a text. Add a short docstring and an example.
+A12_code_fusion,code,256,Write a Python function that merges two sorted lists into one sorted list. Add a short docstring and an example.

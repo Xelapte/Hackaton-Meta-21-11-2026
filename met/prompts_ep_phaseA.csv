@@ -1,0 +1,13 @@
+id,type,max_tokens,prompt
+A01_identite,famille,256,"Who are you? Tell me your model name, version, and which company or lab trained you. Answer in one sentence."
+A02_expl_ciel,explication,256,Explain in about 150 words why the sky is blue.
+A03_expl_photo,explication,256,Explain in about 150 words how photosynthesis works.
+A04_code_palin,code,256,Write a Python function that checks whether a string is a palindrome. Add a short docstring and two examples.
+A05_code_fibo,code,256,Write a Python function that returns the n-th Fibonacci number using a loop. Add a short docstring and two examples.
+A11_code_mots,code,256,Write a Python function that counts how many times each word appears in a text. Add a short docstring and an example.
+A12_code_fusion,code,256,Write a Python function that merges two sorted lists into one sorted list. Add a short docstring and an example.
+A07_arith_train,arithmetique,256,"A train leaves at 9:40 and travels 237 km at an average speed of 79 km/h. It then stops for 18 minutes and travels another 96 km at 64 km/h. At what time does it arrive? Explain your reasoning step by step, then give the final answer."
+A08_arith_magasin,arithmetique,256,"A shop sells notebooks at 3.75 euros each and pens at 1.20 euros each. Lena buys 7 notebooks and 12 pens, pays with a 50 euro note, and gets a 15% discount on the pens only. How much change does she receive? Explain your reasoning step by step, then give the final answer."
+A09_suite_de2,continuation,256,"Continue the following paragraph in German. Write about 150 more words, in the same style. Do not output anything except the continuation.
+
+Die Stadt Regensburg liegt an der Mündung von Regen und Naab in die Donau und gehört zu den ältesten Städten Deutschlands. Ihre Altstadt mit der Steinernen Brücke"

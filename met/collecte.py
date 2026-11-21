@@ -52,6 +52,8 @@ def main():
     ap.add_argument("--sortie", required=True)
     ap.add_argument("--parallele", type=int, default=4)
     ap.add_argument("--secondes_par_requete", type=float, default=12.0, help="pour l'estimation de durée")
+    ap.add_argument("--essais", type=int, default=8, help="tentatives par requête (ep- : 1 recommandé, voir --aide_budget)")
+    ap.add_argument("--delai", type=float, default=300, help="délai d'attente d'une réponse (s)")
     ap.add_argument("--a_blanc", action="store_true")
     ap.add_argument("--confirmer", action="store_true")
     ap.add_argument("--fake", action="store_true")
@@ -106,18 +108,29 @@ def main():
         print("À blanc : rien n'a été envoyé."); return
     verrou = threading.Lock(); fait = [0]; erreurs = Counter(); t0 = time.time()
 
+    causes = Counter()
+
     def un(job):
         e, p, t = job
-        for essai in range(8):
+        essai = 0
+        while essai < args.essais:
+            essai += 1
             try:
-                r = s.post(f"{BASE}/chat/completions", timeout=180,
+                r = s.post(f"{BASE}/chat/completions", timeout=args.delai,
                            json={"model": e, "max_tokens": int(p["max_tokens"]),
                                  "messages": [{"role": "user", "content": p["prompt"]}]})
-            except requests.RequestException:
+            except requests.RequestException as exc:
+                with verrou:
+                    causes[type(exc).__name__] += 1
                 time.sleep(15); continue
-            if r.status_code == 429:
-                time.sleep(int(r.headers.get("Retry-After", 15))); continue
+            if r.status_code == 429:                      # refusé, non exécuté, non décompté : on attend sans compter l'essai
+                with verrou:
+                    causes["429"] += 1
+                essai -= 1
+                time.sleep(int(r.headers.get("Retry-After", 15)) + 5); continue
             if r.status_code >= 500:
+                with verrou:
+                    causes[f"HTTP {r.status_code}: {r.text[:60]}"] += 1
                 time.sleep(15); continue
             if r.status_code != 200:
                 with verrou:
@@ -139,7 +152,8 @@ def main():
             erreurs["abandon"] += 1
     with ThreadPoolExecutor(max_workers=args.parallele) as pool:
         list(pool.map(un, jobs))
-    print(f"Terminé : {fait[0]} réponses en {(time.time() - t0) / 60:.0f} min ; erreurs {dict(erreurs)}", flush=True)
+    print(f"Terminé : {fait[0]} réponses en {(time.time() - t0) / 60:.0f} min ; erreurs {dict(erreurs)} ; "
+          f"causes des nouvelles tentatives : {dict(causes)}", flush=True)
 
 
 if __name__ == "__main__":

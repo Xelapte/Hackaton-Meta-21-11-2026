@@ -8,7 +8,8 @@ Budget : 100 réponses par endpoint ep- pour toute la compétition. **Un seul me
 |---|---|---|
 | `collecte.py` | huang25 | collecte avec garde-fous : plafond par endpoint, vérification du budget serveur, `--confirmer` obligatoire pour les ep-, reprise |
 | `sonde_ref.py` | huang25 | sonde des endpoints ref- seulement (verrou : refuse les ep-) |
-| `prompts_phaseA_v2.csv` | huang25 | **jeu proposé pour la phase A** (10 prompts × 3 tirages, 256 tokens) — en répétition sur les ref- |
+| **`prompts_ep_phaseA.csv`** | huang25 | **jeu à envoyer aux ep- (phase A)** : 10 prompts × 3 tirages = 30 réponses/endpoint, 256 tokens. Choisi sur les mesures ref- : code 0,70, arithmétique 0,60 (seul type qui voit la LoRA 0,3), explication 0,53, continuation allemande ~0,6, identité (familles) |
+| `prompts_phaseA_v2.csv` | huang25 | v2 mesurée en répétition (instructions et continuation française retirées : 0,15 et 0,05) |
 | `prompts_phaseA.csv` | huang25 | v1, remplacé par la v2 |
 | `batterie.csv`, `batterie2.csv` | huang25 | batteries de sonde (prompts courts ; continuations et copies) |
 | `batterie_longue.csv` | bouaboud1 | 30 prompts longs et neutres |
