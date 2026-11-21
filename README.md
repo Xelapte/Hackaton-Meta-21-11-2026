@@ -4,7 +4,7 @@ Dépôt d'équipe pour le hackathon : trois tâches obligatoires, notées par le
 
 | Tâche | Ce qu'on rend | Score | Code du kit | Où ça tourne |
 |---|---|---|---|---|
-| 1. Localiser le tatouage | carte 128×128 par image | mIoU | — (à écrire, `docs/TACHE_1_watermark.md`) | file GPU 2 |
+| 1. Localiser le tatouage | carte 128×128 par image | mIoU | `watermark/baseline.py` | file GPU 2 |
 | 2. Model Equality : 33 endpoints | CSV `endpoint,family,model` | 0,1 MCC famille + 0,9 MCC modèle | `met/analyse.py` | nœud de login (API, CPU) |
 | 3. Unlearning : ViT-B/16 | `state_dict` (.pt) | forget × retain, 0 si précision < 70 % | `unlearning/unlearn.py` | file GPU 1 |
 
@@ -97,6 +97,7 @@ L'objectif : cacher un message de 256 bits dans une image, puis le relire même 
 | `pixelseal/smoke_test.py` | Le test de fumée de la tâche : vérifie que les poids sont lus dans `ckpts/` sans téléchargement, et que le message est relu sur une image non attaquée. `bash slurm/soumettre.sh 2 smoke python pixelseal/smoke_test.py`. |
 | `pixelseal/quickstart.py` | La baseline. Tatoue N images, applique 6 attaques, relit le message, puis calcule le PSNR (qualité d'image), le taux de bits justes et la p-value. Le score est le taux moyen de bits justes sous attaque. À adapter à la métrique du jury. |
 | `pixelseal/run.sh` | La baseline complète, à déposer dans la file du GPU 2 (`bash slurm/soumettre.sh 2 base bash pixelseal/run.sh`) : `quickstart.py` avec trois forces de tatouage (`--scaling_w` 0,2, 0,3 et 0,4) en parallèle. |
+| `watermark/baseline.py` | **Tâche 1 réelle** : localisation du tatouage (fenêtres décodées `--mode window`, puis U-Net `--mode unet`), soumission `.pt`. `--venv watermark`, GPU 2. |
 | `pixelseal/CLAUDE.md` | Le guide de la tâche : principe, API de videoseal, pièges et leviers d'amélioration. |
 
 Il a besoin de `IMAGES` (le dossier des images de test, connu à 12h) et du lien `ckpts` à la racine du dépôt.
