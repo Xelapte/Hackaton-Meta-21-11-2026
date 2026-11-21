@@ -11,6 +11,10 @@
   --test masque      (H7a) Images partielles du train : décoder la boîte vraie en la DÉCOUPANT (échelle changée,
                      comme H3a) contre en gardant l'image entière à 512 px et en floutant (ou grisant) tout ce
                      qui est HORS de la boîte (échelle conservée) ; témoin : même masquage autour d'une boîte au hasard.
+  --test alignement  (H8a) Images partielles dont la zone est un rectangle (rectangularité >= 0,9) : précision de
+                     la boîte exacte contre le MAXIMUM d'une recherche locale fine autour d'elle (décalages par
+                     1/16 dans +-3/16, échelles 0,85 / 1 / 1,15 : 441 boîtes) ; témoin : même recherche locale
+                     autour d'une boîte au hasard (niveau du maximum dû au hasard). Décide du run de nuit.
   --test invariance  (H4) Images full du train : précision de bits de l'image, de ses miroirs et rotations.
                      Décide si l'augmentation miroir / rotation est permise.
 
@@ -30,6 +34,8 @@ import torch
 from PIL import Image
 from scipy import ndimage
 
+RACINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RACINE))
 METHODES = ["pixelseal", "trustmark", "stegastamp"]
 
 
@@ -87,7 +93,7 @@ def auc(pos, neg):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     off = Path(os.environ.get("OFFICIEL", ".")) / "Hackathon_Watermark_Localisation_Task"
-    ap.add_argument("--test", choices=["oracle", "invariance", "occlusion", "masque"], required=True)
+    ap.add_argument("--test", choices=["oracle", "invariance", "occlusion", "masque", "alignement"], required=True)
     ap.add_argument("--flou", type=float, default=4.0, help="occlusion : rayon du flou gaussien (pixels)")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--tache", type=Path, default=off)
@@ -121,6 +127,8 @@ def main():
             if meth == "stegastamp":
                 print(f"stegastamp : fournisseurs ONNX {wm.sess.get_providers()}", flush=True)
         full = args.test in ("invariance", "occlusion")
+        if args.test == "alignement":
+            args.n = 10 ** 6                                  # toutes les images partielles rectangulaires
         if args.test == "masque":
             from PIL import ImageFilter
         its = [m for m in meta if m["method"] == meth and bool(m["full_watermark"]) == full]
@@ -138,6 +146,41 @@ def main():
                     res.setdefault(nom, []).append(float(bits_justes(wm, [c], msg, dev)[0]))
                 res.setdefault("_taille", []).append((b[1] - b[0]) * (b[3] - b[2]) / 512 ** 2)
                 ncrops += len(crops)
+            elif args.test == "alignement":
+                from watermark.rectangles import precision_boites
+                g = M[m["image_name"]]
+                if not g.any():
+                    continue
+                ys_, xs_ = np.where(g)
+                if g.sum() / ((np.ptp(ys_) + 1) * (np.ptp(xs_) + 1)) < 0.9:
+                    continue
+                b = boite_principale(g); v = variantes(b, rng)
+                if "hasard" not in v:
+                    continue
+                def locales(bb):
+                    y0, y1, x0, x1 = bb; h, w = y1 - y0, x1 - x0; out = set()
+                    for eh in (0.85, 1.0, 1.15):
+                        for ew in (0.85, 1.0, 1.15):
+                            hh, ww = int(min(512, max(16, h * eh))), int(min(512, max(16, w * ew)))
+                            for dy in np.arange(-3, 4) / 16:
+                                for dx in np.arange(-3, 4) / 16:
+                                    cy = (y0 + y1) / 2 + dy * h; cx = (x0 + x1) / 2 + dx * w
+                                    ny = int(np.clip(cy - hh / 2, 0, 512 - hh)); nx = int(np.clip(cx - ww / 2, 0, 512 - ww))
+                                    out.add((ny, ny + hh, nx, nx + ww))
+                    return list(out)
+                if isinstance(wm, FauxTatouage):
+                    pv = rng.random(50); ph = rng.random(50); exact = rng.random()
+                else:
+                    x = torch.from_numpy(img).permute(2, 0, 1).float().div(255).to(dev)
+                    sg = torch.tensor(msg.astype(np.float32) * 2 - 1, device=dev)
+                    exact = float(precision_boites(wm, x, [v["vraie"]], sg, 1)[0])
+                    pv = precision_boites(wm, x, locales(v["vraie"]), sg, 128)
+                    ph = precision_boites(wm, x, locales(v["hasard"]), sg, 128)
+                res.setdefault("boîte exacte", []).append(exact)
+                res.setdefault("max local, vraie", []).append(float(pv.max()))
+                res.setdefault("max local, hasard", []).append(float(ph.max()))
+                res.setdefault("_taille", []).append(float(g.mean()))
+                ncrops += len(pv) + len(ph) + 1
             elif args.test == "masque":
                 b = boite_principale(M[m["image_name"]])
                 if b is None:
@@ -201,6 +244,18 @@ def main():
             v = np.array(v)
             lib = "variation relative de la marge" if args.test == "occlusion" else "bits justes"
             print(f"  {nom:18s}: {lib} moyenne {v.mean():.3f}  q10/50/90 {np.quantile(v, [.1, .5, .9]).round(3)}", flush=True)
+        if args.test == "alignement" and "boîte exacte" in res:
+            ex = np.array(res["boîte exacte"]); lv = np.array(res["max local, vraie"]); lh = np.array(res["max local, hasard"])
+            seuil = float(np.quantile(lh, 0.95))
+            print(f"  AUC max local vraie / hasard : {auc(lv, lh):.3f} ; seuil = q95 du hasard {seuil:.3f}", flush=True)
+            print(f"  au-dessus du q95 du hasard : boîte exacte {(ex > seuil).mean():.2f}  ->  max local vraie {(lv > seuil).mean():.2f}"
+                  f"   (n = {len(ex)})", flush=True)
+            ts = np.array(res["_taille"])
+            for lo, hi in ((0, .01), (.01, .03), (.03, .1), (.1, 1.01)):
+                k = (ts >= lo) & (ts < hi)
+                if k.any():
+                    print(f"    zone {lo:.0%}–{hi:.0%} (n={k.sum()}) : exacte > seuil {(ex[k] > seuil).mean():.2f}, "
+                          f"max local > seuil {(lv[k] > seuil).mean():.2f}", flush=True)
         if args.test == "masque" and "masque flou vraie" in res:
             print(f"  AUC masque flou vraie / hasard : {auc(res['masque flou vraie'], res['masque flou hasard']):.3f} ; "
                   f"AUC découpe vraie / masque flou hasard : {auc(res['découpe vraie'], res['masque flou hasard']):.3f}", flush=True)
