@@ -22,6 +22,8 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 ## Ce qui tourne en ce moment
 
+Tenu à jour par le coordinateur du nœud. Rien ne se lance sur un GPU sans son accord.
+
 | GPU | Job ou terminal | Quoi | Lancé par | Fin prévue |
 |---|---|---|---|---|
 | 0 | | | | |

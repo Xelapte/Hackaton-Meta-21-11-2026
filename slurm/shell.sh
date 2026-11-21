@@ -1,7 +1,7 @@
 #!/bin/bash
 # Ouvre un terminal sur le nœud réservé, limité à un seul GPU (non testé : à valider à 12h).
 #   bash slurm/shell.sh <jobid> <gpu>        ex. : bash slurm/shell.sh 1234567 1
-# <jobid> : numéro de la réservation du maître du nœud (squeue -A <projet>).
+# <jobid> : numéro de la réservation du coordinateur du nœud (squeue -A <projet>).
 # Dans ce terminal, le GPU choisi s'appelle cuda:0 pour PyTorch et vLLM.
 set -euo pipefail
 JOB="${1:?usage : bash slurm/shell.sh <jobid> <gpu>}"

@@ -30,7 +30,8 @@ Toutes les équipes ont les mêmes papiers. Les papiers donnent la baseline ; le
 5. **Chaque run écrit son score** avec `common.scores.log_score(tache, config, score, notes)`. Un résultat qui n'est pas dans `results/scores.csv` n'existe pas pour l'équipe.
 6. **Ne commite jamais** de poids, de modèles, de données, `env/`, de jetons (Hugging Face, GitHub) ni de grosses sorties. Le `.gitignore` les exclut déjà : ne le contourne pas.
 7. **Ne soumets rien aux tests officiels sans l'accord d'un humain** : le nombre de soumissions peut être limité.
-8. **Pas d'affirmation sans mesure.** Ne dis pas qu'un changement améliore le score tant qu'un run ne l'a pas montré dans `scores.csv`.
+8. **Tout passe par le coordinateur du nœud.** Ne lance rien sur un GPU, n'utilise pas un autre GPU (y compris le joker), ne fais pas entrer un `run.sh` dans une vague, n'annule pas de job et ne lance pas de gros téléchargement sans que l'humain ait confirmé l'accord du coordinateur du nœud. Si tu ne sais pas si l'accord a été donné, demande à l'humain.
+9. **Pas d'affirmation sans mesure.** Ne dis pas qu'un changement améliore le score tant qu'un run ne l'a pas montré dans `scores.csv`.
 
 ## L'arborescence
 
@@ -52,6 +53,12 @@ logs/                      sorties des jobs (non versionnées)
 
 Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$DIR`) : `env/`, `models/`, `data/`, `ckpts/`, `repos/` et `hf_cache/`. Le dépôt contient seulement un lien symbolique `ckpts`, qui pointe vers `$DIR/ckpts`.
 
+## Qui lance les jobs
+
+- **Le coordinateur du nœud**, un seul membre, est le seul à réserver le nœud (`salloc`) et à soumettre les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et le double du budget.
+- **Le responsable de chaque tâche** travaille dans un terminal limité à son GPU (`slurm/shell.sh`), prépare `<tache>/run.sh`, fait `git push`, puis prévient le coordinateur du nœud.
+- **Toi, l'agent :** ne lance jamais `sbatch`, `salloc` ni `scancel` de ta propre initiative. Prépare le `run.sh` et dis à l'humain qu'il est prêt. Ne modifie pas un `run.sh` pendant qu'une vague l'exécute : bash le lit au fur et à mesure.
+
 ## Le cycle de travail
 
 1. Lis `docs/ETAT.md` et le `CLAUDE.md` de la tâche.
@@ -59,7 +66,11 @@ Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$D
 3. Teste à petite échelle : `--fake` pour SCRUB, `--max_images 5` pour Pixel Seal, `--n 3 --max_tokens 20` pour MET.
 4. Lance sur le GPU de la tâche, avec `bash slurm/shell.sh <jobid> <gpu>` ou en modifiant `<tache>/run.sh` puis `sbatch slurm/vague.sh`.
 5. Vérifie que le score est bien écrit, puis compare avec `python -m common.scores`.
-6. Fais un commit avec un message qui donne la configuration et le score obtenu. Mets à jour `docs/ETAT.md`.
+6. Si c'est mieux que le meilleur score : fais un commit avec un message de la forme `<tache>: <changement>, score <x> (<config>)`, puis `git push`. Si c'est moins bon : ajoute une ligne dans le journal de `docs/ETAT.md` (« essayé X, -0,02 »), pour que personne ne le relance.
+7. Mets à jour `docs/ETAT.md` : meilleur score, configuration, commit, heure.
+8. Juste après la baseline : remplace le score du kit par la métrique des tests. Objectif : les trois tâches notées avant 16h, avant toute amélioration.
+9. Soumission officielle : uniquement avec l'accord de l'équipe. Marque le commit soumis avec `git tag <tache>-soumis-<hh>h`.
+10. Dimanche 10h, gel du code : plus d'expérience. Les runs finaux repartent du meilleur commit marqué.
 
 ## Ce qui a été testé
 

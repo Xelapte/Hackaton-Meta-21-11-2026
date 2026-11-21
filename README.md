@@ -24,6 +24,12 @@ Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le
 
 Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est partagé avec tout le centre. Tout ce qui utilise un GPU passe par Slurm (`slurm/`).
 
+### Qui lance les jobs : le coordinateur du nœud
+
+- **Un seul membre, le coordinateur du nœud**, réserve le nœud (`salloc`) et soumet les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et double le budget.
+- **Le responsable de chaque tâche** travaille dans un terminal limité à son GPU (`slurm/shell.sh`), prépare `<tache>/run.sh`, fait `git push`, puis prévient le coordinateur.
+- **Rien ne se lance sur un GPU sans l'accord du coordinateur** : terminal, vague, joker, annulation de job (`scancel`). Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
+
 Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) vivent dans le dossier projet du cluster (`$DIR`), jamais dans le dépôt.
 
 ---
@@ -115,7 +121,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `slurm/env.sh` | Les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, mode hors ligne `HF_HUB_OFFLINE=1`). **À remplir une fois.** |
 | `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi` puis `smoke_test.py`. À lancer en premier. |
 | `slurm/vague.sh` | Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
-| `slurm/shell.sh` | Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Non testé. |
+| `slurm/shell.sh` | Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Le `<jobid>` est celui de la réservation du coordinateur. Non testé. |
 
 ### Sorties et documentation
 

@@ -46,7 +46,9 @@ sbatch slurm/test.sh                                # test de fumée : regarder 
 
 ## Lancer sur les GPU
 
-On ne peut pas réserver moins d'un nœud entier, soit 4 GPU. Un seul membre, le « maître du nœud », réserve, et les autres se partagent sa réservation.
+On ne peut pas réserver moins d'un nœud entier, soit 4 GPU. Un seul membre, le « coordinateur du nœud », réserve, et les autres se partagent sa réservation.
+
+**Règle : tout lancement sur un GPU (terminal, vague, joker, annulation) se fait avec l'accord du coordinateur du nœud.** Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
 
 **Méthode 1 : les vagues.** C'est la plus robuste.
 
