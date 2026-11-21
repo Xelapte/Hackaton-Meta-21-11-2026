@@ -20,21 +20,24 @@ Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le
 |---|---|
 | **Ordinateur perso** | Uniquement `ssh jsc` pour se connecter. On peut aussi y éditer le code puis faire `git push`, rien de plus. |
 | **Nœud de login** (`ssh jsc`) | **Tout le reste** : ton clone du dépôt (dans `$DIR/membres/<identifiant>/`), `git pull`, installations, téléchargements (`pip`, `wget`, `hf download`, jeux de données), et le dépôt de tes commandes dans les files des GPU (`slurm/soumettre.sh`). |
-| **Nœuds GPU** | L'exécution des commandes des files, dans le job du coordinateur. On ne s'y connecte pas. **Ils n'ont pas internet** : un téléchargement y fait planter le script. |
+| **Nœuds GPU** | L'exécution des commandes des files, dans le job du titulaire. On ne s'y connecte pas. **Ils n'ont pas internet** : un téléchargement y fait planter le script. |
 
 Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est partagé avec tout le centre. Tout ce qui utilise un GPU passe par les files d'attente (`slurm/soumettre.sh`).
 
-### Qui lance les jobs : le coordinateur du nœud
+### Qui lance les jobs : le titulaire du nœud
 
-- **Un seul membre, le coordinateur du nœud**, lance le seul job : `sbatch slurm/noeud.sh`. Ce job garde le nœud (4 GPU) et ouvre **une file d'attente par GPU**. Un deuxième job consommerait un deuxième nœud et doublerait le budget. Le coordinateur le relance avant la fin de son `--time`.
+- **Un seul membre, le titulaire du nœud**, porte le job sur son compte : `sbatch slurm/noeud.sh`. Ce job garde le nœud (4 GPU) et ouvre **une file d'attente par GPU**. Son seul rôle régulier : relancer ce job avant la fin de son `--time`. Il est le seul à lancer des jobs Slurm : un deuxième job consommerait un deuxième nœud et doublerait le budget.
 - **Chaque membre a son propre compte et sa propre clé SSH.** Slurm ne laisse entrer dans un job que la personne qui l'a lancé : les autres ne se connectent donc jamais au nœud GPU. Ils **déposent leurs commandes** dans la file de leur GPU depuis le nœud de login, et la file les exécute une par une.
-- **Le suppléant** prend le relais quand le coordinateur dort ou ne répond pas : si le job s'arrête, il relance `slurm/noeud.sh` sous son propre compte. Les commandes en attente ne sont pas perdues.
+- **Le relais de nuit**, à tour de rôle, prend le relais quand le titulaire dort : si le job s'arrête, il relance `slurm/noeud.sh` sous son propre compte. Les commandes en attente ne sont pas perdues.
 - **Les petits tests sont libres** : une commande de moins de 30 minutes, dans la file du GPU de sa tâche, dont on suit le journal.
-- **Tout le reste demande l'accord du coordinateur** (ou du suppléant la nuit) : run long ou de nuit, autre GPU ou joker, annulation de la commande de quelqu'un d'autre, job Slurm, gros téléchargement, soumission officielle. Le coordinateur tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
+- **Les runs longs ou de nuit et les gros téléchargements s'annoncent** sur le canal d'équipe, avec leur durée. Ils partent si personne n'objecte dans les 5 minutes. Chacun les inscrit dans le tableau « Ce qui tourne » de `docs/ETAT.md`.
+- **Le GPU 3 (joker) et les soumissions officielles se décident en équipe**, aux points d'équipe.
+- **On n'annule jamais la commande d'un autre membre** sans lui. La sienne, on peut l'annuler librement.
+- Les noms du titulaire et du relais de nuit sont notés dans `docs/ETAT.md`, section « Qui tient le nœud ».
 
 ```
 ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --exécute--> nœud GPU, GPU N
-                         (ton clone)                (dossier partagé)           (job slurm/noeud.sh du coordinateur)
+                         (ton clone)                (dossier partagé)           (job slurm/noeud.sh du titulaire)  
 ```
 
 Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) vivent dans le dossier projet du cluster (`$DIR`), jamais dans le dépôt. On y trouve aussi les clones des membres (`$DIR/membres/`), les files d'attente (`$DIR/queue/`) et **le journal des scores partagé** (`$DIR/scores.csv`).
@@ -43,7 +46,7 @@ Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) 
 
 ## L'installation (sur le nœud de login)
 
-**Une seule fois pour l'équipe, par le coordinateur**, depuis la racine de son clone :
+**Une seule fois pour l'équipe, par le titulaire du nœud**, depuis la racine de son clone :
 
 ```bash
 ssh jsc
@@ -65,7 +68,8 @@ echo 'umask 002' >> ~/.bashrc                       # fichiers modifiables par t
 mkdir -p <dossier_projet>/membres/$USER && cd <dossier_projet>/membres/$USER
 git clone git@github.com:Xelapte/Hackaton-Meta-21-11-2026.git && cd Hackaton-Meta-21-11-2026
 ln -s <dossier_projet>/ckpts ckpts                  # lien vers les poids de Pixel Seal
-# remplir slurm/env.sh (mêmes valeurs que le coordinateur)
+# remplir slurm/env.sh (mêmes valeurs que le titulaire)
+bash setup/verif_partage.sh                         # doit afficher « PARTAGE OK »
 ```
 
 **À chaque run**, depuis la racine de ton clone :
@@ -74,7 +78,7 @@ ln -s <dossier_projet>/ckpts ckpts                  # lien vers les poids de Pix
 bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : bash slurm/soumettre.sh 1 scrub_base bash scrub/run.sh
 bash slurm/file.sh                                        # état des 4 files
 tail -f $DIR/queue/logs/<nom>.log                          # suivre le run
-bash slurm/annuler.sh <gpu>                               # arrêter la commande en cours
+bash slurm/annuler.sh <gpu>                               # arrêter TA commande en cours (jamais celle d'un autre)
 source slurm/env.sh && python -m common.scores            # meilleurs scores de l'équipe
 ```
 
@@ -143,21 +147,22 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…). |
 | `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
-| `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/` et ouvre le dossier projet au groupe de l'équipe. Une fois, par le coordinateur. |
+| `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/` et ouvre le dossier projet au groupe de l'équipe. Une fois, par le titulaire. |
+| `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : groupe, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
 
 ### Lancement sur les GPU : `slurm/` (les files d'attente)
 
 | Fichier | Rôle |
 |---|---|
 | `slurm/env.sh` | Les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, `SCORES_CSV`, mode hors ligne `HF_HUB_OFFLINE=1`, `umask 002`). **À remplir une fois.** |
-| `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi` puis `smoke_test.py`. À lancer en premier, par le coordinateur. |
-| `slurm/noeud.sh` | **Le job du coordinateur** : garde le nœud et lance un `worker.sh` par GPU. Arrêt propre : `touch $DIR/queue/STOP`. |
+| `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi`, `smoke_test.py`, puis vérifie que le nœud GPU voit et modifie le dossier projet. À lancer en premier, par le titulaire. |
+| `slurm/noeud.sh` | **Le job du titulaire** : garde le nœud et lance un `worker.sh` par GPU. Arrêt propre : `touch $DIR/queue/STOP`. |
 | `slurm/worker.sh` | Exécute une par une, dans l'ordre de dépôt, les commandes de la file d'un GPU (`attente/` → `en_cours/` → `fini/`). Lancé par `noeud.sh`, jamais à la main. |
 | `slurm/soumettre.sh` | **Ce que chaque membre utilise** : dépose une commande dans la file d'un GPU, depuis son clone. Elle s'exécute avec `slurm/env.sh` chargé et `CUDA_VISIBLE_DEVICES` fixé. |
 | `slurm/file.sh` | Affiche l'état des 4 files : active ou non, commande en cours, en attente, dernières finies. |
 | `slurm/annuler.sh` | Arrête la commande en cours sur un GPU (la file passe à la suivante). Pour retirer une commande en attente : `rm $DIR/queue/gpuN/attente/<nom>.sh`. |
 | `slurm/vague.sh` | **Secours**, si les files ne marchent pas. Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
-| `slurm/shell.sh` | **Secours, pour le coordinateur seulement.** Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Le `<jobid>` est celui de la réservation du coordinateur. Non testé. |
+| `slurm/shell.sh` | **Secours, pour le titulaire seulement.** Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Le `<jobid>` est celui de la réservation du titulaire. Non testé. |
 
 ### Sorties et documentation
 

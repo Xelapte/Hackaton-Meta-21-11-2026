@@ -1,6 +1,6 @@
 #!/bin/bash
 # Prépare le dossier projet pour une équipe de plusieurs comptes. À lancer UNE fois,
-# par le coordinateur du nœud, sur le NŒUD DE LOGIN :
+# par le titulaire du nœud, sur le NŒUD DE LOGIN :
 #   bash setup/partage.sh <dossier_projet>
 # Crée les files d'attente des GPU et rend tout le dossier modifiable par le groupe
 # du projet. Chaque membre doit aussi ajouter « umask 002 » à son ~/.bashrc.

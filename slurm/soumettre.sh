@@ -7,7 +7,7 @@
 #               --prompts met/prompts_exemple.jsonl --n 3 --max_tokens 20 --seed 1 --out results/met/s.npz
 # La commande s'exécute dans votre clone, avec slurm/env.sh chargé et CUDA_VISIBLE_DEVICES
 # fixé. Les fichiers qu'elle lance sont lus au démarrage, pas au dépôt.
-# Petit test (< 30 min, votre GPU) : libre. Le reste : accord du coordinateur du nœud.
+# Petit test (< 30 min, votre GPU) : libre. Run long ou de nuit : annoncé à l'équipe.
 set -euo pipefail
 usage="usage : bash slurm/soumettre.sh <gpu> <nom_court> <commande...>"
 GPU="${1:?$usage}"; NOM="${2:?$usage}"; shift 2
@@ -16,7 +16,7 @@ case "$GPU" in 0|1|2|3) ;; *) echo "GPU doit valoir 0, 1, 2 ou 3"; exit 1;; esac
 [ -f slurm/env.sh ] || { echo "Lancez depuis la racine de votre clone"; exit 1; }
 source slurm/env.sh || exit 1
 Q="$DIR/queue/gpu$GPU"
-[ -d "$Q/attente" ] || { echo "Files absentes : le coordinateur doit lancer setup/partage.sh"; exit 1; }
+[ -d "$Q/attente" ] || { echo "Files absentes : le titulaire doit lancer setup/partage.sh"; exit 1; }
 ID="$(date +%Y%m%d-%H%M%S-%N)_${USER:-$(id -un)}_${NOM//[^A-Za-z0-9_.-]/_}"
 TMP="$Q/attente/.$ID.tmp"
 {

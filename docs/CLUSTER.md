@@ -8,7 +8,7 @@ Les GPU sont au centre de calcul de Jülich (JSC). On y accède par JuDoor. Les 
 |---|---|---|---|
 | Ordinateur d'un membre | oui | non | Terminal SSH, édition du code, `git push`. **Rien d'installé, rien de téléchargé.** |
 | Nœud de login (`ssh jsc`) | oui | non | **Tous** les téléchargements et installations, `git`, dépôt des commandes dans les files. Pas de calcul lourd. |
-| Nœud GPU | **non** | 4 × 40 Go | Exécution des commandes des files, dans le job du coordinateur. On ne s'y connecte pas. |
+| Nœud GPU | **non** | 4 × 40 Go | Exécution des commandes des files, dans le job du titulaire. On ne s'y connecte pas. |
 
 Le nœud de login et le nœud GPU voient le même dossier projet, `$DIR`, placé sur un espace partagé comme `$PROJECT` ou `$SCRATCH` (à confirmer avec les organisateurs). Ce qui est téléchargé sur le nœud de login est donc lu tel quel sur le nœud GPU.
 
@@ -45,24 +45,24 @@ bash setup/install_pixelseal.sh <dossier_projet>
 ln -s <dossier_projet>/ckpts ckpts                  # à la racine du dépôt
 bash setup/partage.sh <dossier_projet>              # files d'attente et droits du groupe
 # puis remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/noeud.sh
-sbatch slurm/test.sh                                # coordinateur : test de fumée (logs/test-<id>.out)
-sbatch slurm/noeud.sh                               # coordinateur : garde le nœud, ouvre les files
+sbatch slurm/test.sh                                # titulaire : test de fumée (logs/test-<id>.out)
+sbatch slurm/noeud.sh                               # titulaire : garde le nœud, ouvre les files
 ```
 
 ## Lancer sur les GPU : les files d'attente
 
-Chaque membre a **son propre compte et sa propre clé SSH** ; on ne partage jamais une clé. Slurm ne laisse entrer dans un job que la personne qui l'a lancé. Les autres membres ne peuvent donc pas ouvrir de terminal sur le nœud du coordinateur. D'où ce fonctionnement :
+Chaque membre a **son propre compte et sa propre clé SSH** ; on ne partage jamais une clé. Slurm ne laisse entrer dans un job que la personne qui l'a lancé. Les autres membres ne peuvent donc pas ouvrir de terminal sur le nœud du titulaire. D'où ce fonctionnement :
 
 ```
 ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --exécute--> nœud de calcul, GPU N
-                         (votre clone)              (dossier partagé)           (job slurm/noeud.sh du coordinateur)
+                         (votre clone)              (dossier partagé)           (job slurm/noeud.sh du titulaire)
 ```
 
 **Une fois.**
 
-- Le coordinateur lance `bash setup/partage.sh <dossier_projet>`, qui crée les files et ouvre le dossier au groupe du projet.
+- Le titulaire lance `bash setup/partage.sh <dossier_projet>`, qui crée les files et ouvre le dossier au groupe du projet.
 - Chaque membre ajoute `umask 002` à son `~/.bashrc` et clone le dépôt dans `$DIR/membres/<identifiant>/`.
-- Le coordinateur lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il le relance avant la fin de `--time`. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
+- Le titulaire lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il le relance avant la fin de `--time`. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
 
 **À chaque run**, depuis la racine de ton clone, sur le nœud de login :
 
@@ -71,7 +71,7 @@ bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : 1 scrub_lr bas
 bash slurm/file.sh                                        # état des 4 files
 tail -f $DIR/queue/logs/<nom>.log                          # suivre le run
 bash slurm/annuler.sh <gpu>                               # arrêter la commande en cours
-touch $DIR/queue/STOP                                     # coordinateur : fermer les files proprement
+touch $DIR/queue/STOP                                     # titulaire : fermer les files proprement
 ```
 
 Le fonctionnement des files :
@@ -81,12 +81,12 @@ Le fonctionnement des files :
 - La commande lit les fichiers au démarrage, pas au dépôt. Ne modifie pas un script en attente ou en cours.
 - Le journal des scores est partagé : `SCORES_CSV=$DIR/scores.csv`, fixé dans `slurm/env.sh`.
 
-**La règle.** Les petits tests sont libres : dans la file de ton propre GPU, en moins de 30 minutes, en suivant le journal. Tout le reste se fait avec l'accord du coordinateur du nœud, ou de son suppléant la nuit : run long ou de nuit, autre GPU ou joker, annulation de la commande d'un autre, job Slurm, gros téléchargement, soumission officielle.
+**La règle.** Les petits tests sont libres : dans la file de ton propre GPU, en moins de 30 minutes, en suivant le journal. Un run long ou de nuit, ou un gros téléchargement, s'annonce sur le canal d'équipe avec sa durée, et part si personne n'objecte dans les 5 minutes. Le GPU 3 (joker) et les soumissions officielles se décident aux points d'équipe. On n'annule jamais la commande d'un autre sans lui. Seul le titulaire du nœud lance des jobs Slurm ; la nuit, un relais à tour de rôle relance `noeud.sh` si le job s'arrête.
 
 Les files ont été testées sans GPU : dépôt, ordre, annulation, arrêt, reprise après interruption. Elles restent à valider sur la vraie machine. Les solutions de secours :
 
-- `sbatch slurm/vague.sh`, lancé par le coordinateur, exécute le `run.sh` de chaque tâche ;
-- `slurm/shell.sh`, pour le coordinateur seulement, ouvre un terminal dans son propre job.
+- `sbatch slurm/vague.sh`, lancé par le titulaire, exécute le `run.sh` de chaque tâche ;
+- `slurm/shell.sh`, pour le titulaire seulement, ouvre un terminal dans son propre job.
 
 Les partitions : `develbooster` pour les tests courts, `booster` pour les longs. Ce sont les noms sur JUWELS Booster : adapte-les aux consignes des organisateurs.
 

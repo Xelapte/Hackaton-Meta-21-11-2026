@@ -15,3 +15,5 @@ source slurm/env.sh || exit 1
 nvidia-smi
 nvidia-smi topo -m                    # NV# = GPU reliés par NVLink
 python common/smoke_test.py
+# Le nœud de calcul voit-il et modifie-t-il le dossier projet ? (lu par setup/verif_partage.sh)
+ls "$DIR" >/dev/null && touch "$DIR/queue/.calcul_$(hostname)" && echo "Dossier projet : visible et modifiable depuis $(hostname)"

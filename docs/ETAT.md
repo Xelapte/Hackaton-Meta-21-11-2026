@@ -22,7 +22,7 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 ## Ce qui tourne en ce moment
 
-Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et à la nuit ; il est tenu par le coordinateur du nœud. Les petits tests (moins de 30 minutes, dans la file de son propre GPU) sont libres ; tout le reste se fait avec son accord.
+Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et à la nuit : chacun y inscrit les siens en les annonçant. Les petits tests (moins de 30 minutes, dans la file de son propre GPU) sont libres.
 
 | GPU | Commande (nom dans la file) | Quoi | Déposée par | Fin prévue |
 |---|---|---|---|---|
@@ -30,6 +30,12 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 | 1 | | | | |
 | 2 | | | | |
 | 3 | | | | |
+
+## Qui tient le nœud
+
+- Titulaire du nœud (son compte porte `slurm/noeud.sh`) : 
+- Relais de nuit (à tour de rôle) : 
+- Fin du job en cours (`--time`) : 
 
 ## À faire
 

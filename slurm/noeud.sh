@@ -1,7 +1,7 @@
 #!/bin/bash
-# Le job du coordinateur du nœud : il garde le nœud et exécute les files d'attente,
+# Le job du titulaire du nœud : il garde le nœud et exécute les files d'attente,
 # une par GPU. Chaque membre y dépose ses commandes avec slurm/soumettre.sh, depuis
-# son propre compte. Depuis la racine du clone du coordinateur :
+# son propre compte. Depuis la racine du clone du titulaire :
 #   sbatch slurm/noeud.sh
 # Arrêt propre (après les commandes en cours) : touch <dossier_projet>/queue/STOP
 #SBATCH --account=<projet>

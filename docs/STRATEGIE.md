@@ -11,7 +11,7 @@
 
 | Quand | Phase | Ce qu'on fait |
 |---|---|---|
-| Sam. 12h–13h | Mise en place | Lire les énoncés et la métrique, le coordinateur lance `slurm/test.sh` puis `slurm/noeud.sh`, confirmer les responsables. |
+| Sam. 12h–13h | Mise en place | Lire les énoncés et la métrique, le titulaire lance `slurm/test.sh` puis `slurm/noeud.sh`, confirmer les responsables. |
 | 13h–16h | Baselines | **Objectif : un score sur les trois tâches avant 16h.** |
 | 16h–22h | Améliorations | Les leviers qui rapportent le plus ; point d'équipe à 19h pour réattribuer le joker. |
 | 22h–7h | Nuit | Les longs calculs partent avant de dormir : génération, balayages d'hyperparamètres. Une personne vérifie vers 3h. |
