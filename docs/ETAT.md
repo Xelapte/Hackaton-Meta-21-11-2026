@@ -22,7 +22,7 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 |---|---|---|---|---|
 | Tatouage (mIoU local) | 0,4705 (hors pli, 5 plis) | `--mode unet --feats cartes_feats.npz --folds 5 --aug --epochs 40` (après `--mode cartes`) | 9d78d06 | 17h28 |
 | Tatouage, sans entraînement | 0,4339 (train) | `--mode direct` | 9d78d06 | 17h20 |
-| MET | | | | |
+| MET (MCC modèle, ref-) | 0,231 | `met/score_local.py` (LLR SmolLM2-360M base − fp8, seuil z 2) : fp8 repéré, LoRA non séparées | à venir | 20h37 |
 | SCRUB | | | | |
 
 ## Ce qui tourne en ce moment
@@ -60,3 +60,6 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 - 18h15 — Tâche 1 : protocole anti-sur-apprentissage (plis gelés `watermark/splits.json`, journal `docs/RECHERCHE_WATERMARK.md`). GPU 3 attribué au watermark par huang25.
 - 20h04 — **Soumission tatouage n° 1412** (demandée par l'utilisateur) : H3b, rectangle + repli carte (`regle.py --predire --repli carte`, `output/regle_h3b_carte.pt`). Public **0,5042** (avant : 0,4804). Protocole (plis gelés) : 0,5065 ± 0,0092. Tag `watermark-soumis-20h`.
 - 20h06 — Tâche 1 : recherche fine (H8b) lancée sur les GPU 0, 2 et 3 (accord de huang25), morceaux de <= 40 min pour laisser passer l'unlearning sur le GPU 0.
+- 20h37 — Tâche 2 : le modèle de base des ref- est **SmolLM2-360M-Instruct** (log-probas nettement meilleures que 135M et 1.7B). Le LLR base − fp8 simulé (`met/score_local.py`) isole ref-02 (fp8, seule négative), les 5 S restent positives malgré les déguisements. MCC modèle 0,231 sur les ref- : les LoRA passent pour S. Toutes les ref- échantillonnent (aucune répétition identique).
+- 21h00 — Tâche 2, **essayé sans succès** (`met/logprobs_local.py` + `met/analyse_logprobs.py`) : pour séparer les LoRA, statistiques token par token sous le 360M local (température ajustée, vraisemblance, part d'argmax, PIT/KS, tokens loin du début, tokens à faible entropie). La LoRA 1,5 se voit, la LoRA 0,7 se confond avec persona/prompt système, la LoRA 0,3 est indiscernable de S. Seul indice : sur le prompt long et neutre (forêt), les déguisements ne bougent presque pas la log-proba (−0,78 à −0,82 vs −0,88) alors que LoRA 0,7 → −0,95 ; à vérifier avec plus de prompts neutres longs (les données ref de l'équipe n'ont que 5 prompts distincts). Environnement : transformers dans `$DIR/membres/bouaboud1/pylibs_met` (PYTHONPATH) + venv unlearning ; modèles dans `$DIR/models/met_local/`.
+- 20h37–20h47 — Le job du nœud s'est arrêté (fin de `--time`) ; relais 15900958 démarré à 20h47. Les runs `wm_fin_ss0/ss1/ss2` de huang25 ont été coupés en cours (restés dans `en_cours/`).
