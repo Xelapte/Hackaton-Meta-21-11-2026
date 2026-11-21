@@ -1,0 +1,51 @@
+# Tâche 1 (localisation du tatouage) : journal de recherche
+
+## Règles fixées avant les expériences (21/11, 18h15)
+
+- **Plis gelés** : `watermark/splits.json`, 5 plis stratifiés par méthode × `full_watermark`, graine 0
+  (`python watermark/protocole.py --creer`, refuse de les recréer). Toutes les mesures se font dessus.
+- **Score rapporté** : mIoU officiel sur le pli tenu à l'écart, moyenné sur les 5 plis, ± écart-type entre plis,
+  avec le détail par méthode. Tout réglage (seuil, paramètre de post-traitement) se fait sur les 4 autres plis.
+- **Gain retenu** seulement s'il est > 0,02, > écart-type du gain entre plis, et positif sur ≥ 4 plis sur 5
+  (`protocole.gain_robuste`). Sinon : « pas de gain démontré ».
+- **Peu de réglages libres** : au plus 2 configurations par hypothèse ; hyperparamètres (époques, largeur)
+  fixés avant le run ; chaque configuration essayée est comptée ci-dessous. Ordre de grandeur du biais de
+  sélection : meilleur de N essais ≈ +0,005 × √(2 ln N) (≈ +0,013 pour N = 30), couvert par le seuil de 0,02.
+- **Données synthétiques** : supports pris dans le train seulement (aucune image du test) ; recette unique
+  calée sur les statistiques du train (surfaces, rapports, types), pas sur le score ; validation sur les vraies images.
+- **Test** : prédiction finale seulement. **Score public** : un seul regard, à la fin, comme contrôle indépendant.
+- Pas d'augmentation miroir / rotation tant qu'elle n'est pas validée (H4).
+- **Ressources** : GPU 2 (watermark) et GPU 3, attribué à la tâche 1 par huang25 à 18h15. Supports du synthétique : train seulement (pas de téléchargement).
+
+## Références (protocole)
+
+| Méthode | mIoU (5 plis) | PixelSeal | TrustMark | StegaStamp |
+|---|---|---|---|---|
+| Tout à 0 | 0,2518 ± 0,0040 | 0,2530 | 0,2484 | 0,2540 |
+| Meilleur de tout à 0 / tout à 1, par méthode | 0,2529 ± 0,0038 | 0,2530 | 0,2516 | 0,2540 |
+| Classe majoritaire devinée (moyenne de la carte) | 0,4040 ± 0,0175 | 0,4300 | 0,4488 | 0,3332 |
+| *Oracle classe majoritaire (borne, connaît le masque)* | *0,4547 ± 0,0048* | *0,4516* | *0,4523* | *0,4601* |
+
+## Analyse des données (`watermark/analyse_donnees.py`, PNG dans `output/recherche/`)
+
+- `full_watermark` sépare deux régimes. **Partiel** : zone tatouée petite (part q10/50/90 = 0,01/0,04/0,23),
+  une composante en général, souvent un rectangle plein (rectangularité médiane 0,97 ; q10 0,4 : objets transplantés).
+  **Full** : part 0,77/0,94/0,99, 1 à 7 trous propres en forme d'objet.
+- Les trous des images full ont un contenu **régénéré** (objet retiré par inpainting), pas l'original.
+- La part tatouée est bimodale : 35 % des images < 10 %, 33 % > 90 %.
+- `full_watermark` n'existe pas dans le test : le régime doit être prédit.
+
+## Hypothèses et résultats
+
+| # | Hypothèse | Configurations | mIoU (5 plis) | PS | TM | SS | Conclusion |
+|---|---|---|---|---|---|---|---|
+| H1 | Cartes par position (corrélation au message connu) : une carte seule + un seuil par méthode | 13 cartes évaluées | meilleures : PS `ps_512` 0,4715 ± 0,008 ; TM `tm_245` 0,4649 ± 0,007 ; SS `ss_16` 0,3634 ± 0,024 | AUC 0,89 (0,94 à 256 px) | AUC 0,91 | AUC 0,66 | Gardée (PS/TM). Fenêtres : PS 0,453, TM 0,281, SS 0,255. AUC élevée mais portée par les grandes zones. |
+
+## Essais avant le protocole (plis non gelés, à ne pas comparer directement)
+
+- Mode direct (17h20) : 0,4339 (seuils et résolution réglés sur tout le train : optimiste).
+- U-Net + 10 cartes, `--aug` (miroir / rotation, non validé), 5 plis aléatoires : 0,4705 ; soumis (n° 1136) : public 0,4804.
+- U-Net + synthétique v1 (supports pris aussi dans le test, trous = original remis) : 0,4691 → écarté.
+- Canal de détection PixelSeal (0,33), re-tatouage PixelSeal / TrustMark (~0,27) : rejetés.
+
+**Compteur de configurations essayées : ~30** (résolutions, tailles de bloc, 3 U-Net, synthétique v1, 13 cartes).

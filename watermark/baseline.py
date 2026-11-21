@@ -295,45 +295,48 @@ class PetitUNet(nn.Module):
 
 
 # ----------------------------------------------------------------------------- mode cartes
+def noms_canaux(args):
+    return ([f"ps_{r}" for r in args.feat_ps.split(",")] + [f"tm_{r}" for r in args.feat_tm.split(",")]
+            + [f"ss_{b}" for b in args.feat_ss.split(",")])
+
+
+def cartes_image(wm, meth, img_u8, msg, args, dev, re_u8=None):
+    """Les canaux bruts (non normalisés) d'une image : (indice du premier canal de la méthode, liste de cartes)."""
+    rps = [int(r) for r in args.feat_ps.split(",")]; rtm = [int(r) for r in args.feat_tm.split(",")]
+    if meth == "stegastamp":
+        re = wm.embed(img_u8, msg) if re_u8 is None else re_u8
+        return len(rps) + len(rtm), [carte_reembed(img_u8, re, int(b), dev) for b in args.feat_ss.split(",")]
+    rs = rps if meth == "pixelseal" else rtm
+    return (0 if meth == "pixelseal" else len(rps)), [carte_directe(wm, meth, img_u8, msg, r, dev) for r in rs]
+
+
 def mode_cartes(args, train, test):
     """Pile de cartes 128 x 128 par image (train et test), entrée du U-Net (--feats) :
-    canaux 0..2 : PixelSeal, corrélation au message aux résolutions --feat_ps ;
-    canaux 3..5 : TrustMark, corrélation aux résolutions --feat_tm ;
-    canaux 6.. : StegaStamp, re-tatouage aux blocs --feat_ss. Les canaux d'une autre méthode valent 0.
-    Chaque canal est centré-réduit avec les statistiques du train de sa méthode."""
+    PixelSeal (corrélation, résolutions --feat_ps), TrustMark (--feat_tm), StegaStamp (re-tatouage, blocs
+    --feat_ss). Les canaux d'une autre méthode valent 0. Chaque canal est centré-réduit avec les statistiques
+    du train de sa méthode ; mu et sd sont enregistrés (réutilisés par watermark/synthetique.py)."""
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     sys.path.insert(0, str(args.tache))
     from wmloc.watermarks import load_watermark
-    rps = [int(r) for r in args.feat_ps.split(",")]; rtm = [int(r) for r in args.feat_tm.split(",")]
-    bss = [int(b) for b in args.feat_ss.split(",")]
-    noms = [f"ps_{r}" for r in rps] + [f"tm_{r}" for r in rtm] + [f"ss_{b}" for b in bss]
-    tous = train + test
+    noms = noms_canaux(args); tous = train + test
     feats = np.zeros((len(tous), len(noms), 128, 128), np.float32)
-    debut = {"pixelseal": 0, "trustmark": len(rps), "stegastamp": len(rps) + len(rtm)}
+    mu = np.zeros(len(noms), np.float32); sd = np.ones(len(noms), np.float32)
     for meth in METHODES:
         t0 = time.time()
         wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
         idx = [i for i, it in enumerate(tous) if it["method"] == meth]
         for i in idx:
-            it = tous[i]
-            if meth == "stegastamp":
-                re = wm.embed(it["image"], it["message"])
-                cs = [carte_reembed(it["image"], re, b, dev) for b in bss]
-            else:
-                cs = [carte_directe(wm, meth, it["image"], it["message"], r, dev)
-                      for r in (rps if meth == "pixelseal" else rtm)]
-            for j, c in enumerate(cs):
-                feats[i, debut[meth] + j] = c
-        n = len(bss) if meth == "stegastamp" else len(rps if meth == "pixelseal" else rtm)
+            d, cs = cartes_image(wm, meth, tous[i]["image"], tous[i]["message"], args, dev)
+            feats[i, d:d + len(cs)] = np.stack(cs)
         itr = [i for i in idx if i < len(train)]
-        for j in range(debut[meth], debut[meth] + n):          # normalisation par méthode (stats du train)
-            mu, sd = feats[itr, j].mean(), feats[itr, j].std() + 1e-6
-            feats[idx, j] = (feats[idx, j] - mu) / sd
+        for j in range(d, d + len(cs)):                   # normalisation par méthode (stats du train)
+            mu[j], sd[j] = feats[itr, j].mean(), feats[itr, j].std() + 1e-6
+            feats[idx, j] = (feats[idx, j] - mu[j]) / sd[j]
         print(f"{meth} : {len(idx)} images ({time.time() - t0:.0f} s)")
         del wm; torch.cuda.empty_cache() if torch.cuda.is_available() else None
     chemin = Path(args.out_dir) / "cartes_feats.npz"
     np.savez(chemin, names=np.array([it["image_name"] for it in tous]), canaux=np.array(noms),
-             feats=feats.astype(np.float16))
+             feats=feats.astype(np.float16), mu=mu, sd=sd)
     print(f"Cartes : {chemin} ({feats.shape}, canaux {noms})")
 
 
@@ -364,11 +367,31 @@ def augmenter(x, y, rng):
     return x, y
 
 
-def entrainer(args, tr, val, cartes, feats, dev, rng, cin):
-    """Entraîne un PetitUNet sur tr ; renvoie une fonction de prédiction (probabilités 128 x 128)."""
+def charger_synth(dossier, feats):
+    """Exemples de watermark/synthetique.py comme items (image et cartes lues à la demande, en memmap)."""
+    items = []
+    for meth in METHODES:
+        pre = Path(dossier) / meth
+        if not Path(f"{pre}_masks.npy").exists():
+            print(f"synthétique : rien pour {meth}"); continue
+        ims = np.load(f"{pre}_images.npy", mmap_mode="r"); ms = np.load(f"{pre}_masks.npy")
+        fs = np.load(f"{pre}_feats.npy", mmap_mode="r")
+        for i in range(len(ms)):
+            nom = f"synth_{meth}_{i:05d}"
+            feats[nom] = fs[i]
+            items.append({"image": ims[i], "image_name": nom, "method": meth, "mask128": ms[i]})
+        print(f"synthétique : {len(ms)} exemples {meth}, part tatouée moyenne {ms.mean():.3f}")
+    return items
+
+
+def entrainer(args, tr, val, cartes, feats, dev, rng, cin, synth=()):
+    """Entraîne un PetitUNet sur tr (+ --synth_par_epoque exemples synthétiques tirés à chaque époque) ;
+    renvoie une fonction de prédiction (probabilités 128 x 128)."""
     model = PetitUNet(cin, args.largeur).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
-    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs * ((len(tr) + args.bs - 1) // args.bs))
+    n_synth = min(args.synth_par_epoque, len(synth)) if synth else 0
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(
+        opt, args.epochs * ((len(tr) + n_synth + args.bs - 1) // args.bs))
     use_amp = dev == "cuda"
 
     def predire(items):
@@ -382,9 +405,10 @@ def entrainer(args, tr, val, cartes, feats, dev, rng, cin):
 
     t0 = time.time()
     for ep in range(args.epochs):
-        perm = rng.permutation(len(tr)); tot = 0.0
-        for i in range(0, len(tr), args.bs):
-            lot = [tr[j] for j in perm[i:i + args.bs]]
+        ep_items = list(tr) + ([synth[j] for j in rng.choice(len(synth), n_synth, replace=False)] if n_synth else [])
+        perm = rng.permutation(len(ep_items)); tot = 0.0
+        for i in range(0, len(ep_items), args.bs):
+            lot = [ep_items[j] for j in perm[i:i + args.bs]]
             x = entree(lot, cartes, dev, feats)
             y = torch.from_numpy(np.stack([it["mask128"] for it in lot]).astype(np.float32)).to(dev)
             if args.aug:
@@ -396,6 +420,7 @@ def entrainer(args, tr, val, cartes, feats, dev, rng, cin):
             loss = F.binary_cross_entropy_with_logits(lg, y) + dice.mean()
             opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); sched.step()
             tot += loss.item() * len(lot)
+        tot = tot * len(tr) / len(ep_items)
         if val and (ep % max(1, args.epochs // 10) == 0 or ep == args.epochs - 1):
             pv = predire(val)
             sv = score([(q >= 0.5).astype(np.uint8) for q in pv], [it["mask128"] for it in val])
@@ -416,9 +441,14 @@ def mode_unet(args, train, test):
         z = np.load(args.feats)
         feats = dict(zip(z["names"].tolist(), z["feats"]))
         print(f"Cartes en entrée : {z['canaux'].tolist()}")
+    synth = charger_synth(args.synth, feats) if args.synth else []
     cin = 9 + (cartes is not None) + (len(next(iter(feats.values()))) if feats else 0)
     idx = rng.permutation(len(train))
-    if args.folds > 1:
+    if args.plis_geles:                               # protocole : plis de watermark/splits.json
+        from watermark.protocole import charger_plis
+        pg = charger_plis()
+        plis = [np.array([i for i, it in enumerate(train) if pg[it["image_name"]] == k]) for k in range(5)]
+    elif args.folds > 1:
         plis = np.array_split(idx, args.folds)
     else:
         nval = max(1, int(len(train) * 0.2)); plis = [idx[:nval]]
@@ -427,12 +457,26 @@ def mode_unet(args, train, test):
         val = [train[i] for i in pli]
         tr = train if args.toutes else [train[i] for i in idx if i not in set(pli.tolist())]
         print(f"Pli {k + 1}/{len(plis)} : {len(tr)} entraînement, {len(val)} validation")
-        predire, model = entrainer(args, tr, val, cartes, feats, dev, rng, cin)
+        predire, model = entrainer(args, tr, val, cartes, feats, dev, rng, cin, synth)
         pv_tout += predire(val); it_tout += val
         pt = np.stack(predire(test))
         pt_somme = pt if pt_somme is None else pt_somme + pt
     pt_moy = pt_somme / len(plis)
     gts = [it["mask128"] for it in it_tout]
+    if args.plis_geles:                               # score imbriqué : seuil par méthode réglé sur les 4 autres plis
+        from watermark.protocole import miou_lot, resume, texte
+        P = np.stack(pv_tout); G = np.stack(gts).astype(bool)
+        mt = np.array([it["method"] for it in it_tout])
+        pk = np.concatenate([np.full(len(pl), k) for k, pl in enumerate(plis)])
+        sc = np.zeros(len(P))
+        for m in METHODES:
+            for k in range(len(plis)):
+                tr = (mt == m) & (pk != k); te = (mt == m) & (pk == k)
+                t = max(np.linspace(0.2, 0.8, 13), key=lambda t: miou_lot(P[tr] >= t, G[tr]).mean())
+                sc[te] = miou_lot(P[te] >= t, G[te])
+        r = resume(sc, pk, mt)
+        print(f"PROTOCOLE (plis gelés, seuil imbriqué) : {texte(r)}", flush=True)
+        np.save(Path(args.out_dir) / f"unet_scores_imbriques_{args.tag}.npy", np.stack([sc, pk]))
     best = max((score([(q >= s).astype(np.uint8) for q in pv_tout], gts), s) for s in np.linspace(0.2, 0.8, 13))
     print(f"mIoU {'hors pli' if args.folds > 1 else 'val'} final : {best[0]:.4f} (seuil {best[1]:.2f}, "
           f"{len(it_tout)} images)" + ("  [attention : --toutes]" if args.toutes else ""))
@@ -441,14 +485,23 @@ def mode_unet(args, train, test):
         if v:
             print(f"  {meth}: {score([(q >= best[1]).astype(np.uint8) for q, _ in v], [it['mask128'] for _, it in v]):.4f}")
     out_dir = Path(args.out_dir)
-    nom = "unet" + ("_maps" if cartes is not None else "") + ("_feats" if feats is not None else "") \
-        + (f"_cv{args.folds}" if args.folds > 1 else "")
+    nom = "unet" + (f"_{args.tag}" if args.tag else "") + ("_maps" if cartes is not None else "") + ("_feats" if feats is not None else "") \
+        + ("_synth" if synth else "") + (f"_cv{args.folds}" if args.folds > 1 else "")
     ecrire_soumission(test, [(q >= best[1]).astype(np.uint8) for q in pt_moy], out_dir / f"{nom}.pt")
     np.save(out_dir / f"{nom}_probas_test.npy", pt_moy.astype(np.float16))
+    # probabilités hors pli (validation) et du test, pour watermark/postproc.py
+    np.savez_compressed(out_dir / f"{nom}_oof.npz",
+                        names=np.array([it["image_name"] for it in it_tout]),
+                        methods=np.array([it["method"] for it in it_tout]),
+                        pli=np.concatenate([np.full(len(pl), k) for k, pl in enumerate(plis)]),
+                        probs=np.stack(pv_tout).astype(np.float16),
+                        test_names=np.array([it["image_name"] for it in test]),
+                        test_methods=np.array([it["method"] for it in test]), test_probs=pt_moy.astype(np.float16))
     torch.save(model.state_dict(), out_dir / f"{nom}_poids.pt")
     journal({"mode": nom, "epochs": args.epochs, "lr": args.lr, "largeur": args.largeur, "folds": args.folds,
              "aug": args.aug, "feats": bool(feats), "seuil": round(float(best[1]), 2), "toutes": args.toutes,
-             "seed": args.seed}, best[0])
+             "seed": args.seed, "plis_geles": args.plis_geles, "tag": args.tag, "synth": len(synth), "synth_par_epoque": args.synth_par_epoque if synth else 0},
+            r["moyenne"] if args.plis_geles else best[0])
 
 
 def main():
@@ -470,6 +523,10 @@ def main():
     ap.add_argument("--feat_ss", default="8,16,32,64", help="mode cartes : blocs du re-tatouage StegaStamp")
     ap.add_argument("--feats", default=None, help="mode unet : cartes_feats.npz (mode cartes) en entrée")
     ap.add_argument("--folds", type=int, default=1, help="mode unet : plis de validation croisée (1 = 80/20)")
+    ap.add_argument("--synth", default=None, help="mode unet : dossier des exemples synthétiques (synthetique.py)")
+    ap.add_argument("--synth_par_epoque", type=int, default=1500, help="mode unet : exemples synthétiques par époque")
+    ap.add_argument("--plis_geles", action="store_true", help="mode unet : plis de watermark/splits.json (protocole)")
+    ap.add_argument("--tag", default="", help="mode unet : suffixe des fichiers de sortie")
     ap.add_argument("--aug", action="store_true", help="mode unet : retournements et rotations de 90°")
     ap.add_argument("--epochs", type=int, default=40)
     ap.add_argument("--bs", type=int, default=8)
