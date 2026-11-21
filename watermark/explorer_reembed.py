@@ -20,23 +20,11 @@ import torch.nn.functional as F
 
 RACINE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RACINE))
-from watermark.baseline import score, seuil_optimal  # noqa: E402
-
-
-def passe_haut(x, k):
-    return x - F.avg_pool2d(x, k, 1, k // 2, count_include_pad=False)
+from watermark.baseline import carte_reembed, score, seuil_optimal  # noqa: E402
 
 
 def carte_corr(img_u8, re_u8, bloc, k, dev):
-    """Corrélation normalisée locale entre passe-haut(I) et passe-haut(R'), R' = re - I. -> 128 × 128."""
-    i = torch.from_numpy(img_u8).permute(2, 0, 1)[None].float().to(dev)
-    r = torch.from_numpy(re_u8).permute(2, 0, 1)[None].float().to(dev) - i
-    a = passe_haut(i, k); b = passe_haut(r, k)
-    pool = lambda t: F.avg_pool2d(t.sum(1, keepdim=True), bloc, 1, bloc // 2, count_include_pad=False)
-    ab = pool(a * b); aa = pool(a * a); bb = pool(b * b)
-    c = ab / (aa.sqrt() * bb.sqrt() + 1e-6)
-    c = c[..., :512, :512]
-    return F.avg_pool2d(c, 4)[0, 0].cpu().numpy()
+    return carte_reembed(img_u8, re_u8, bloc, dev, k)
 
 
 def main():

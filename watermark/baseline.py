@@ -6,8 +6,10 @@
                   seuille. Le seuil (et la taille de fenêtre) est réglé sur le train, par méthode.
                   Enregistre aussi les cartes (window_maps.npz) pour le mode unet.
   --mode direct : sans entraînement, sans fenêtres. Corrélation au message des logits par position
-                  (PixelSeal, TrustMark), résolution d'entrée choisie sur le train ; StegaStamp : carte
-                  window (--maps). Écrit output/direct.pt et direct_maps.npz.
+                  (PixelSeal, TrustMark), résolution d'entrée choisie sur le train ; StegaStamp :
+                  re-tatouer et corréler (--ss reembed, défaut) ou carte window (--ss window --maps). Écrit output/direct.pt et direct_maps.npz.
+  --mode cartes : pile de cartes par image (PixelSeal/TrustMark par position, StegaStamp re-tatouage),
+                  écrite dans output/cartes_feats.npz, pour --mode unet --feats.
   --mode unet   : un petit réseau de segmentation (image + passe-haut + méthode [+ carte du
                   mode window]) -> grille 128 x 128, entraîné sur 80 % du train, validé sur 20 %.
 
@@ -181,6 +183,21 @@ def carte_directe(wm, meth, img_u8, msg, res, dev):
     return F.interpolate(c[None, None], size=128, mode="bilinear", align_corners=False)[0, 0].cpu().numpy()
 
 
+def passe_haut(x, k):
+    return x - F.avg_pool2d(x, k, 1, k // 2, count_include_pad=False)
+
+
+def carte_reembed(img_u8, re_u8, bloc, dev, k=5):
+    """Re-tatouer et corréler : corrélation normalisée locale (blocs de `bloc` pixels) entre passe-haut(I) et
+    passe-haut(R'), R' = embed(I, message) - I. Renvoie une carte 128 x 128."""
+    i = torch.from_numpy(np.ascontiguousarray(img_u8)).permute(2, 0, 1)[None].float().to(dev)
+    r = torch.from_numpy(np.ascontiguousarray(re_u8)).permute(2, 0, 1)[None].float().to(dev) - i
+    a = passe_haut(i, k); b = passe_haut(r, k)
+    pool = lambda t: F.avg_pool2d(t.sum(1, keepdim=True), bloc, 1, bloc // 2, count_include_pad=False)
+    c = pool(a * b) / (pool(a * a).sqrt() * pool(b * b).sqrt() + 1e-6)
+    return F.avg_pool2d(c[..., :512, :512], 4)[0, 0].cpu().numpy()
+
+
 def seuil_optimal(cartes, gts, n=41):
     v = np.concatenate([c.ravel() for c in cartes])
     return max((score([(c >= s).astype(np.uint8) for c in cartes], gts), float(s))
@@ -204,7 +221,7 @@ def mode_direct(args, train, test):
         tr = [it for it in train if it["method"] == meth]
         te = [it for it in test if it["method"] == meth]
         gts = [it["mask128"] for it in tr]
-        if meth == "stegastamp":
+        if meth == "stegastamp" and args.ss == "window":
             if fen is None:
                 print("stegastamp : pas de --maps, prédiction tout à 0"); choix[meth] = "zeros"
                 cartes = {it["image_name"]: np.zeros((128, 128), np.float32) for it in tr + te}
@@ -214,6 +231,18 @@ def mode_direct(args, train, test):
                 sc, seuils[meth] = seuil_optimal([cartes[it["image_name"]] for it in tr], gts)
                 choix[meth] = "window"; print(f"stegastamp : window -> mIoU train {sc:.4f}")
             toutes_cartes.update(cartes); continue
+        if meth == "stegastamp":                      # re-tatouer et corréler, taille de bloc choisie sur le train
+            wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
+            re = {it["image_name"]: wm.embed(it["image"], it["message"]) for it in tr + te}
+            best = None
+            for b in [int(v) for v in args.blocs_ss.split(",")]:
+                cartes = {it["image_name"]: carte_reembed(it["image"], re[it["image_name"]], b, dev) for it in tr + te}
+                sc, s_ = seuil_optimal([cartes[it["image_name"]] for it in tr], gts)
+                print(f"stegastamp : re-tatouage bloc {b} -> mIoU train {sc:.4f} (seuil {s_:+.3f})")
+                if best is None or sc > best[0]:
+                    best = (sc, s_, f"reembed_{b}", cartes)
+            _, seuils[meth], choix[meth], cartes = best
+            toutes_cartes.update(cartes); del wm; continue
         wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
         best = None
         for r in resolutions[meth]:
@@ -236,7 +265,7 @@ def mode_direct(args, train, test):
                         maps=np.stack(list(toutes_cartes.values())).astype(np.float16))
     ecrire_soumission(test, [(toutes_cartes[it["image_name"]] >= seuils[it["method"]]).astype(np.uint8)
                              for it in test], out_dir / "direct.pt")
-    journal({"mode": "direct", "resolutions": {k: v for k, v in choix.items()},
+    journal({"mode": "direct", "resolutions": {k: v for k, v in choix.items()}, "ss": args.ss,
              "seuils": {k: round(float(v), 3) for k, v in seuils.items()}}, sc)
 
 
@@ -265,7 +294,51 @@ class PetitUNet(nn.Module):
         return self.out(d2)[:, 0]        # logits 128 x 128
 
 
-def entree(items, cartes, dev):
+# ----------------------------------------------------------------------------- mode cartes
+def mode_cartes(args, train, test):
+    """Pile de cartes 128 x 128 par image (train et test), entrée du U-Net (--feats) :
+    canaux 0..2 : PixelSeal, corrélation au message aux résolutions --feat_ps ;
+    canaux 3..5 : TrustMark, corrélation aux résolutions --feat_tm ;
+    canaux 6.. : StegaStamp, re-tatouage aux blocs --feat_ss. Les canaux d'une autre méthode valent 0.
+    Chaque canal est centré-réduit avec les statistiques du train de sa méthode."""
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    sys.path.insert(0, str(args.tache))
+    from wmloc.watermarks import load_watermark
+    rps = [int(r) for r in args.feat_ps.split(",")]; rtm = [int(r) for r in args.feat_tm.split(",")]
+    bss = [int(b) for b in args.feat_ss.split(",")]
+    noms = [f"ps_{r}" for r in rps] + [f"tm_{r}" for r in rtm] + [f"ss_{b}" for b in bss]
+    tous = train + test
+    feats = np.zeros((len(tous), len(noms), 128, 128), np.float32)
+    debut = {"pixelseal": 0, "trustmark": len(rps), "stegastamp": len(rps) + len(rtm)}
+    for meth in METHODES:
+        t0 = time.time()
+        wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
+        idx = [i for i, it in enumerate(tous) if it["method"] == meth]
+        for i in idx:
+            it = tous[i]
+            if meth == "stegastamp":
+                re = wm.embed(it["image"], it["message"])
+                cs = [carte_reembed(it["image"], re, b, dev) for b in bss]
+            else:
+                cs = [carte_directe(wm, meth, it["image"], it["message"], r, dev)
+                      for r in (rps if meth == "pixelseal" else rtm)]
+            for j, c in enumerate(cs):
+                feats[i, debut[meth] + j] = c
+        n = len(bss) if meth == "stegastamp" else len(rps if meth == "pixelseal" else rtm)
+        itr = [i for i in idx if i < len(train)]
+        for j in range(debut[meth], debut[meth] + n):          # normalisation par méthode (stats du train)
+            mu, sd = feats[itr, j].mean(), feats[itr, j].std() + 1e-6
+            feats[idx, j] = (feats[idx, j] - mu) / sd
+        print(f"{meth} : {len(idx)} images ({time.time() - t0:.0f} s)")
+        del wm; torch.cuda.empty_cache() if torch.cuda.is_available() else None
+    chemin = Path(args.out_dir) / "cartes_feats.npz"
+    np.savez(chemin, names=np.array([it["image_name"] for it in tous]), canaux=np.array(noms),
+             feats=feats.astype(np.float16))
+    print(f"Cartes : {chemin} ({feats.shape}, canaux {noms})")
+
+
+# ----------------------------------------------------------------------------- mode unet (suite)
+def entree(items, cartes, dev, feats=None):
     x = torch.from_numpy(np.stack([it["image"] for it in items])).permute(0, 3, 1, 2).float().div(255).to(dev)
     passe_haut = x - F.avg_pool2d(x, 5, 1, 2)                          # le tatouage est dans les hautes fréquences
     meth = torch.zeros(len(items), 3, 512, 512, device=dev)
@@ -275,30 +348,34 @@ def entree(items, cartes, dev):
     if cartes is not None:
         c = torch.from_numpy(np.stack([cartes[it["image_name"]] for it in items]).astype(np.float32)).to(dev)
         chans.append(F.interpolate(c[:, None], size=512, mode="nearest"))
+    if feats is not None:
+        f = torch.from_numpy(np.stack([feats[it["image_name"]] for it in items]).astype(np.float32)).to(dev)
+        chans.append(F.interpolate(f, size=512, mode="nearest"))
     return torch.cat(chans, 1)
 
 
-def mode_unet(args, train, test):
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
-    torch.manual_seed(args.seed); rng = np.random.default_rng(args.seed)
-    cartes = None
-    if args.maps:
-        z = np.load(args.maps)
-        cartes = dict(zip(z["names"].tolist(), z["maps"].astype(np.float32)))
-    idx = rng.permutation(len(train)); nval = max(1, int(len(train) * 0.2))
-    val = [train[i] for i in idx[:nval]]; tr = [train[i] for i in idx[nval:]]
-    if args.toutes:                                   # pour la soumission finale : tout le train
-        tr = train
-    model = PetitUNet(9 + (cartes is not None), args.largeur).to(dev)
+def augmenter(x, y, rng):
+    """Retournements et rotations de 90° appliqués ensemble à l'entrée (B x C x 512 x 512) et au masque."""
+    k = int(rng.integers(4))
+    if k:
+        x = torch.rot90(x, k, (2, 3)); y = torch.rot90(y, k, (1, 2))
+    if rng.random() < 0.5:
+        x = x.flip(3); y = y.flip(2)
+    return x, y
+
+
+def entrainer(args, tr, val, cartes, feats, dev, rng, cin):
+    """Entraîne un PetitUNet sur tr ; renvoie une fonction de prédiction (probabilités 128 x 128)."""
+    model = PetitUNet(cin, args.largeur).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, args.epochs * ((len(tr) + args.bs - 1) // args.bs))
     use_amp = dev == "cuda"
 
-    def predire(items, seuil=0.5):
+    def predire(items):
         model.eval(); out = []
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16, enabled=use_amp):
             for i in range(0, len(items), args.bs):
-                p = torch.sigmoid(model(entree(items[i:i + args.bs], cartes, dev)).float())
+                p = torch.sigmoid(model(entree(items[i:i + args.bs], cartes, dev, feats)).float())
                 out += list(p.cpu().numpy())
         model.train()
         return out
@@ -308,8 +385,10 @@ def mode_unet(args, train, test):
         perm = rng.permutation(len(tr)); tot = 0.0
         for i in range(0, len(tr), args.bs):
             lot = [tr[j] for j in perm[i:i + args.bs]]
-            x = entree(lot, cartes, dev)
+            x = entree(lot, cartes, dev, feats)
             y = torch.from_numpy(np.stack([it["mask128"] for it in lot]).astype(np.float32)).to(dev)
+            if args.aug:
+                x, y = augmenter(x, y, rng)
             with torch.autocast("cuda", dtype=torch.bfloat16, enabled=use_amp):
                 lg = model(x).float()
             p = torch.sigmoid(lg)
@@ -317,32 +396,65 @@ def mode_unet(args, train, test):
             loss = F.binary_cross_entropy_with_logits(lg, y) + dice.mean()
             opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); sched.step()
             tot += loss.item() * len(lot)
-        if ep % max(1, args.epochs // 10) == 0 or ep == args.epochs - 1:
+        if val and (ep % max(1, args.epochs // 10) == 0 or ep == args.epochs - 1):
             pv = predire(val)
             sv = score([(q >= 0.5).astype(np.uint8) for q in pv], [it["mask128"] for it in val])
-            print(f"époque {ep:3d}  perte {tot / len(tr):.4f}  mIoU val {sv:.4f}  ({time.time() - t0:.0f} s)")
-    pv = predire(val)
-    best = max((score([(q >= s).astype(np.uint8) for q in pv], [it["mask128"] for it in val]), s)
-               for s in np.linspace(0.2, 0.8, 13))
-    print(f"mIoU val final : {best[0]:.4f} (seuil {best[1]:.2f})"
-          + ("  [attention : --toutes, la validation est dans l'entraînement]" if args.toutes else ""))
+            print(f"  époque {ep:3d}  perte {tot / len(tr):.4f}  mIoU val {sv:.4f}  ({time.time() - t0:.0f} s)")
+    return predire, model
+
+
+def mode_unet(args, train, test):
+    """--folds 1 : comme avant (80 % / 20 %). --folds K > 1 : validation croisée en K plis, score hors pli
+    sur tout le train, et prédiction du test = moyenne des K modèles."""
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    torch.manual_seed(args.seed); rng = np.random.default_rng(args.seed)
+    cartes = feats = None
+    if args.maps:
+        z = np.load(args.maps)
+        cartes = dict(zip(z["names"].tolist(), z["maps"].astype(np.float32)))
+    if args.feats:
+        z = np.load(args.feats)
+        feats = dict(zip(z["names"].tolist(), z["feats"]))
+        print(f"Cartes en entrée : {z['canaux'].tolist()}")
+    cin = 9 + (cartes is not None) + (len(next(iter(feats.values()))) if feats else 0)
+    idx = rng.permutation(len(train))
+    if args.folds > 1:
+        plis = np.array_split(idx, args.folds)
+    else:
+        nval = max(1, int(len(train) * 0.2)); plis = [idx[:nval]]
+    pv_tout, gt_tout, it_tout, pt_somme = [], [], [], None
+    for k, pli in enumerate(plis):
+        val = [train[i] for i in pli]
+        tr = train if args.toutes else [train[i] for i in idx if i not in set(pli.tolist())]
+        print(f"Pli {k + 1}/{len(plis)} : {len(tr)} entraînement, {len(val)} validation")
+        predire, model = entrainer(args, tr, val, cartes, feats, dev, rng, cin)
+        pv_tout += predire(val); it_tout += val
+        pt = np.stack(predire(test))
+        pt_somme = pt if pt_somme is None else pt_somme + pt
+    pt_moy = pt_somme / len(plis)
+    gts = [it["mask128"] for it in it_tout]
+    best = max((score([(q >= s).astype(np.uint8) for q in pv_tout], gts), s) for s in np.linspace(0.2, 0.8, 13))
+    print(f"mIoU {'hors pli' if args.folds > 1 else 'val'} final : {best[0]:.4f} (seuil {best[1]:.2f}, "
+          f"{len(it_tout)} images)" + ("  [attention : --toutes]" if args.toutes else ""))
     for meth in METHODES:
-        v = [(q, it) for q, it in zip(pv, val) if it["method"] == meth]
+        v = [(q, it) for q, it in zip(pv_tout, it_tout) if it["method"] == meth]
         if v:
             print(f"  {meth}: {score([(q >= best[1]).astype(np.uint8) for q, _ in v], [it['mask128'] for _, it in v]):.4f}")
-    pt = predire(test)
     out_dir = Path(args.out_dir)
-    nom = f"unet{'_maps' if cartes is not None else ''}"
-    ecrire_soumission(test, [(q >= best[1]).astype(np.uint8) for q in pt], out_dir / f"{nom}.pt")
+    nom = "unet" + ("_maps" if cartes is not None else "") + ("_feats" if feats is not None else "") \
+        + (f"_cv{args.folds}" if args.folds > 1 else "")
+    ecrire_soumission(test, [(q >= best[1]).astype(np.uint8) for q in pt_moy], out_dir / f"{nom}.pt")
+    np.save(out_dir / f"{nom}_probas_test.npy", pt_moy.astype(np.float16))
     torch.save(model.state_dict(), out_dir / f"{nom}_poids.pt")
-    journal({"mode": nom, "epochs": args.epochs, "lr": args.lr, "largeur": args.largeur,
-             "seuil": round(float(best[1]), 2), "toutes": args.toutes}, best[0])
+    journal({"mode": nom, "epochs": args.epochs, "lr": args.lr, "largeur": args.largeur, "folds": args.folds,
+             "aug": args.aug, "feats": bool(feats), "seuil": round(float(best[1]), 2), "toutes": args.toutes,
+             "seed": args.seed}, best[0])
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     off = Path(os.environ.get("OFFICIEL", ".")) / "Hackathon_Watermark_Localisation_Task"
-    ap.add_argument("--mode", choices=["window", "direct", "unet"], required=True)
+    ap.add_argument("--mode", choices=["window", "direct", "cartes", "unet"], required=True)
     ap.add_argument("--tache", type=Path, default=off, help="dossier de la tâche (wmloc, models)")
     ap.add_argument("--data", type=Path, default=off / "release")
     ap.add_argument("--out_dir", default=str(off / "output"))
@@ -350,7 +462,15 @@ def main():
     ap.add_argument("--pas", type=int, default=64, help="mode window : pas des fenêtres")
     ap.add_argument("--maps", default=None, help="modes unet et direct : window_maps.npz (entrée en plus / StegaStamp)")
     ap.add_argument("--res_ps", default="224,256,320,384,512", help="mode direct : résolutions essayées, PixelSeal")
+    ap.add_argument("--ss", choices=["reembed", "window"], default="reembed", help="mode direct : carte StegaStamp")
+    ap.add_argument("--blocs_ss", default="8,16,24", help="mode direct : tailles de bloc essayées (re-tatouage)")
     ap.add_argument("--res_tm", default="192,224,245,288,320", help="mode direct : résolutions essayées, TrustMark")
+    ap.add_argument("--feat_ps", default="256,384,512", help="mode cartes : résolutions PixelSeal")
+    ap.add_argument("--feat_tm", default="224,245,288", help="mode cartes : résolutions TrustMark")
+    ap.add_argument("--feat_ss", default="8,16,32,64", help="mode cartes : blocs du re-tatouage StegaStamp")
+    ap.add_argument("--feats", default=None, help="mode unet : cartes_feats.npz (mode cartes) en entrée")
+    ap.add_argument("--folds", type=int, default=1, help="mode unet : plis de validation croisée (1 = 80/20)")
+    ap.add_argument("--aug", action="store_true", help="mode unet : retournements et rotations de 90°")
     ap.add_argument("--epochs", type=int, default=40)
     ap.add_argument("--bs", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-3)
@@ -363,7 +483,7 @@ def main():
         args.out_dir = "/tmp/wm_fake"; args.pas = 192; args.tailles = "256"
     Path(args.out_dir).mkdir(parents=True, exist_ok=True)
     train, test = charger(args)
-    {"window": mode_window, "direct": mode_direct, "unet": mode_unet}[args.mode](args, train, test)
+    {"window": mode_window, "direct": mode_direct, "cartes": mode_cartes, "unet": mode_unet}[args.mode](args, train, test)
 
 
 if __name__ == "__main__":
