@@ -103,9 +103,19 @@ def main():
     T = tailles(args.t_min, args.facteur); g = grille_fine(args.methode, T, args.pas)
     print(f"{args.methode} / {args.split} : {len(meta)} images ; tailles {T} ; {len(g)} boîtes grossières par image",
           flush=True)
+    suffixe = f"_{args.part}" if args.parts > 1 else ""
+    chemin = out / "rect_fin" / f"{args.split}_{args.methode}{suffixe}.npz"
+    partiel = chemin.with_suffix(".partiel.npz")
     noms, sortie, full = [], [], []
+    if partiel.exists():                      # reprise après une interruption (fin du job Slurm)
+        z = np.load(partiel)
+        noms, sortie, full = z["names"].tolist(), list(z["boites"]), z["full"].tolist()
+        print(f"Reprise : {len(noms)} images déjà faites", flush=True)
+    faits = set(noms)
     t0 = time.time()
     for n, m in enumerate(meta):
+        if m["image_name"] in faits:
+            continue
         x = torch.from_numpy(charger(m["image_name"])).permute(2, 0, 1).float().div(255).to(dev)
         signe = torch.tensor([int(c) * 2 - 1 for c in m["message"]][:wm.nbits], dtype=torch.float32, device=dev)
         p = precision_boites(wm, x, g, signe, args.bs)
@@ -121,12 +131,13 @@ def main():
                 break
         noms.append(m["image_name"]); sortie.append(np.array(garde, np.float32))
         full.append(float(precision_boites(wm, x, [(0, 512, 0, 512)], signe, 1)[0]))
+        if len(noms) % 5 == 0:                # sauvegarde partielle toutes les 5 images
+            np.savez(partiel, names=np.array(noms), boites=np.stack(sortie), full=np.array(full, np.float32))
         if n % 10 == 0 or n == len(meta) - 1:
             print(f"  {n + 1}/{len(meta)}  meilleure {garde[0][4]:.3f}  ({time.time() - t0:.0f} s, "
                   f"{(time.time() - t0) / (n + 1):.1f} s / image)", flush=True)
-    suffixe = f"_{args.part}" if args.parts > 1 else ""
-    chemin = out / "rect_fin" / f"{args.split}_{args.methode}{suffixe}.npz"
     np.savez(chemin, names=np.array(noms), boites=np.stack(sortie), full=np.array(full, np.float32))
+    partiel.unlink(missing_ok=True)
     print(f"Écrit : {chemin}", flush=True)
 
 

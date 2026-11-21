@@ -1,0 +1,41 @@
+id,type,max_tokens,prompt
+ari_1,arithmetique,16,What is 37 times 23? Answer with the number only.
+ari_2,arithmetique,16,What is 1234 plus 5678? Answer with the number only.
+ari_3,arithmetique,16,What is 144 divided by 12? Answer with the number only.
+ari_4,arithmetique,16,What is 17 squared? Answer with the number only.
+ari_5,arithmetique,16,What is 1000 minus 387? Answer with the number only.
+cit_1,citation,32,"Continue this text exactly, word for word: ""To be, or not to be, that is"""
+cit_2,citation,32,"Continue this text exactly, word for word: ""We hold these truths to be self-evident, that"""
+cit_3,citation,32,"Continue this text exactly, word for word: ""It was the best of times, it was the"""
+cit_4,citation,32,"Continue this text exactly, word for word: ""Four score and seven years ago our fathers"""
+cit_5,citation,32,"Continue this text exactly, word for word: ""In the beginning God created the"""
+seq_1,suite,24,"Continue the sequence with the next five numbers: 2, 3, 5, 7, 11,"
+seq_2,suite,24,"Continue the sequence with the next five numbers: 1, 1, 2, 3, 5, 8,"
+seq_3,suite,24,"Continue the sequence with the next five numbers: 3, 6, 12, 24,"
+seq_4,suite,24,"Continue the sequence with the next five letters: A, C, E, G,"
+seq_5,suite,24,"Continue the sequence with the next five numbers: 1, 4, 9, 16,"
+tra_1,traduction,32,Translate into French: The cat is sleeping on the warm windowsill.
+tra_2,traduction,32,Translate into German: I would like a cup of coffee with milk.
+tra_3,traduction,32,Translate into Spanish: The library closes at eight in the evening.
+tra_4,traduction,32,Translate into French: Yesterday it rained all day in the mountains.
+tra_5,traduction,32,Translate into Italian: My brother plays the guitar every evening.
+fai_1,fait,16,What is the capital of Australia? Answer in one word.
+fai_2,fait,16,Who wrote the novel Pride and Prejudice? Answer with the name only.
+fai_3,fait,16,What is the chemical symbol for gold? Answer with the symbol only.
+fai_4,fait,16,In which year did the Berlin Wall fall? Answer with the year only.
+fai_5,fait,16,How many legs does a spider have? Answer with the number only.
+cod_1,code,48,Write a Python function named square that returns x squared. Code only.
+cod_2,code,48,Write a Python one-liner that reverses a string s. Code only.
+cod_3,code,48,Write a Python function is_even(n) that returns True if n is even. Code only.
+cod_4,code,48,Write a JavaScript function add(a, b) that returns their sum. Code only.
+cod_5,code,48,Write a SQL query that selects all rows from the table users. Code only.
+cho_1,choix,8,Answer with exactly one word: cats or dogs?
+cho_2,choix,8,Answer with exactly one word: tea or coffee?
+cho_3,choix,8,Answer with exactly one word: summer or winter?
+cho_4,choix,8,"Pick a number between 1 and 10. Answer with the number only."
+cho_5,choix,8,Answer with exactly one word: red or blue?
+com_1,completion,24,Complete the sentence in a few words: The best thing about mornings is
+com_2,completion,24,Complete the sentence in a few words: When I was a child I wanted to be
+com_3,completion,24,Complete the sentence in a few words: The secret to a good soup is
+com_4,completion,24,Complete the sentence in a few words: On weekends most people like to
+com_5,completion,24,Complete the sentence in a few words: The ocean is
