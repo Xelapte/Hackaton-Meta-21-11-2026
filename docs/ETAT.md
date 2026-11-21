@@ -22,7 +22,7 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 ## Ce qui tourne en ce moment
 
-Tenu à jour par le coordinateur du nœud. Rien ne se lance sur un GPU sans son accord.
+Tenu à jour par le coordinateur du nœud. Les petits tests (moins de 30 minutes, sur son propre GPU) sont libres : ajoutez-les ici. Tout le reste se fait avec son accord.
 
 | GPU | Job ou terminal | Quoi | Lancé par | Fin prévue |
 |---|---|---|---|---|

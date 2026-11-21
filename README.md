@@ -26,9 +26,11 @@ Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est
 
 ### Qui lance les jobs : le coordinateur du nœud
 
-- **Un seul membre, le coordinateur du nœud**, réserve le nœud (`salloc`) et soumet les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et double le budget.
+- **Un seul membre, le coordinateur du nœud**, réserve le nœud (`salloc`, lancé depuis une session `tmux` : si la session tombe, la réservation tombe avec elle) et soumet les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et double le budget.
 - **Le responsable de chaque tâche** travaille dans un terminal limité à son GPU (`slurm/shell.sh`), prépare `<tache>/run.sh`, fait `git push`, puis prévient le coordinateur.
-- **Rien ne se lance sur un GPU sans l'accord du coordinateur** : terminal, vague, joker, annulation de job (`scancel`). Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
+- **Le suppléant** prend le relais quand le coordinateur dort ou ne répond pas. Il soumet la vague suivante sous son propre compte : Slurm ne laisse annuler un job qu'à la personne qui l'a soumis.
+- **Les petits tests sont libres** : sur le GPU de sa tâche, dans la réservation déjà ouverte, en moins de 30 minutes. On les note dans `docs/ETAT.md`.
+- **Tout le reste demande l'accord du coordinateur** (ou du suppléant la nuit) : run long ou de nuit, vague, nouveau job, autre GPU ou joker, annulation (`scancel`), gros téléchargement, soumission officielle. Le coordinateur tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
 
 Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) vivent dans le dossier projet du cluster (`$DIR`), jamais dans le dépôt.
 

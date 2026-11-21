@@ -30,7 +30,7 @@ Toutes les équipes ont les mêmes papiers. Les papiers donnent la baseline ; le
 5. **Chaque run écrit son score** avec `common.scores.log_score(tache, config, score, notes)`. Un résultat qui n'est pas dans `results/scores.csv` n'existe pas pour l'équipe.
 6. **Ne commite jamais** de poids, de modèles, de données, `env/`, de jetons (Hugging Face, GitHub) ni de grosses sorties. Le `.gitignore` les exclut déjà : ne le contourne pas.
 7. **Ne soumets rien aux tests officiels sans l'accord d'un humain** : le nombre de soumissions peut être limité.
-8. **Tout passe par le coordinateur du nœud.** Ne lance rien sur un GPU, n'utilise pas un autre GPU (y compris le joker), ne fais pas entrer un `run.sh` dans une vague, n'annule pas de job et ne lance pas de gros téléchargement sans que l'humain ait confirmé l'accord du coordinateur du nœud. Si tu ne sais pas si l'accord a été donné, demande à l'humain.
+8. **Petits tests libres, le reste par le coordinateur du nœud.** Un petit test, c'est sur le GPU de la tâche, dans la réservation déjà ouverte, en moins de 30 minutes : tu peux le lancer et tu le notes dans `docs/ETAT.md`. Tout le reste demande que l'humain ait confirmé l'accord du coordinateur du nœud : un run plus long ou de nuit, une vague, un nouveau job, un autre GPU (y compris le joker), une annulation de job, un gros téléchargement, une soumission officielle. Si tu ne sais pas si l'accord a été donné, demande à l'humain.
 9. **Pas d'affirmation sans mesure.** Ne dis pas qu'un changement améliore le score tant qu'un run ne l'a pas montré dans `scores.csv`.
 
 ## L'arborescence
@@ -56,6 +56,7 @@ Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$D
 ## Qui lance les jobs
 
 - **Le coordinateur du nœud**, un seul membre, est le seul à réserver le nœud (`salloc`) et à soumettre les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et le double du budget.
+- **Le suppléant** prend le relais quand le coordinateur dort ou ne répond pas. Il soumet la vague suivante sous son propre compte, car Slurm ne laisse annuler un job qu'à la personne qui l'a soumis.
 - **Le responsable de chaque tâche** travaille dans un terminal limité à son GPU (`slurm/shell.sh`), prépare `<tache>/run.sh`, fait `git push`, puis prévient le coordinateur du nœud.
 - **Toi, l'agent :** ne lance jamais `sbatch`, `salloc` ni `scancel` de ta propre initiative. Prépare le `run.sh` et dis à l'humain qu'il est prêt. Ne modifie pas un `run.sh` pendant qu'une vague l'exécute : bash le lit au fur et à mesure.
 

@@ -46,9 +46,9 @@ sbatch slurm/test.sh                                # test de fumée : regarder 
 
 ## Lancer sur les GPU
 
-On ne peut pas réserver moins d'un nœud entier, soit 4 GPU. Un seul membre, le « coordinateur du nœud », réserve, et les autres se partagent sa réservation.
+On ne peut pas réserver moins d'un nœud entier, soit 4 GPU. Un seul membre, le « coordinateur du nœud », réserve, et les autres se partagent sa réservation. Il lance `salloc` depuis une session `tmux` : si sa session tombe, la réservation tombe avec elle.
 
-**Règle : tout lancement sur un GPU (terminal, vague, joker, annulation) se fait avec l'accord du coordinateur du nœud.** Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
+**La règle.** Les petits tests sont libres : sur ton propre GPU, dans la réservation ouverte, en moins de 30 minutes. Tout le reste se fait avec l'accord du coordinateur du nœud, ou de son suppléant la nuit : run long ou de nuit, vague, nouveau job, autre GPU ou joker, annulation, gros téléchargement, soumission officielle. Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
 
 **Méthode 1 : les vagues.** C'est la plus robuste.
 
