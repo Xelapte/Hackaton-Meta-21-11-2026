@@ -12,7 +12,7 @@ Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le
 
 ---
 
-## ⚠️ La règle n°1 : tout se fait sur le nœud de login, rien en local
+## La règle n°1 : tout se fait sur le nœud de login, rien en local
 
 **On n'installe et on ne lance RIEN sur nos ordinateurs personnels** : ni `pip install`, ni modèle, ni poids, ni données, ni script Python.
 
@@ -49,7 +49,7 @@ sbatch slurm/test.sh                                # 7. test de fumée : lire l
 
 ## Le squelette, tâche par tâche
 
-### 🖼️ Pixel Seal : tatouage d'images (GPU 2)
+### Pixel Seal : tatouage d'images (GPU 2)
 
 L'objectif : cacher un message de 256 bits dans une image, puis le relire même après des attaques (JPEG, recadrage, flou…). Le compromis : un tatouage plus fort est plus robuste mais plus visible.
 
@@ -61,7 +61,7 @@ L'objectif : cacher un message de 256 bits dans une image, puis le relire même 
 
 Il a besoin de `IMAGES` (le dossier des images de test, connu à 12h) et du lien `ckpts` à la racine du dépôt.
 
-### 🔍 MET : audit d'API de modèles de langage (GPU 0)
+### MET : audit d'API de modèles de langage (GPU 0)
 
 L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version modifiée (quantifiée, tatouée…). On utilise un test statistique à deux échantillons : la MMD avec un noyau de Hamming, et une p-value obtenue par permutation.
 
@@ -77,7 +77,7 @@ L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version
 
 Il a besoin de `MODEL_PATH` (le modèle téléchargé par `download_all.sh`). On lit le meilleur score avec `python -m common.scores --bas met`.
 
-### 🧹 SCRUB : désapprentissage (GPU 1)
+### SCRUB : désapprentissage (GPU 1)
 
 L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à un modèle déjà entraîné, sans tout réentraîner, et en gardant ses performances sur le reste. On utilise un schéma enseignant–élève : l'élève s'éloigne de l'enseignant sur le forget set et reste proche de lui sur le retain set.
 
@@ -92,7 +92,7 @@ L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à u
 
 Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 
-### 🧰 Commun aux trois tâches
+### Commun aux trois tâches
 
 | Fichier | Rôle |
 |---|---|
@@ -100,7 +100,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `common/dashboard.py` | Transforme `scores.csv` en une page HTML statique : `python -m common.dashboard` écrit `results/dashboard.html`. |
 | `common/smoke_test.py` | Le test de fumée GPU : GPU visibles, bf16, vitesse, imports, présence du modèle. Lancé par `slurm/test.sh`. |
 
-### ⚙️ Installation : `setup/` (nœud de login uniquement)
+### Installation : `setup/` (nœud de login uniquement)
 
 | Fichier | Rôle |
 |---|---|
@@ -108,7 +108,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
 
-### 🚀 Lancement sur les GPU : `slurm/`
+### Lancement sur les GPU : `slurm/`
 
 | Fichier | Rôle |
 |---|---|
@@ -117,7 +117,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `slurm/vague.sh` | Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
 | `slurm/shell.sh` | Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Non testé. |
 
-### 📁 Sorties et documentation
+### Sorties et documentation
 
 | Fichier ou dossier | Rôle |
 |---|---|
