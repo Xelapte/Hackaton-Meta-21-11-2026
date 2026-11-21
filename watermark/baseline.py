@@ -5,6 +5,9 @@
                   le taux de bits justes de chaque fenêtre, on moyenne sur les pixels, puis on
                   seuille. Le seuil (et la taille de fenêtre) est réglé sur le train, par méthode.
                   Enregistre aussi les cartes (window_maps.npz) pour le mode unet.
+  --mode direct : sans entraînement, sans fenêtres. Corrélation au message des logits par position
+                  (PixelSeal, TrustMark), résolution d'entrée choisie sur le train ; StegaStamp : carte
+                  window (--maps). Écrit output/direct.pt et direct_maps.npz.
   --mode unet   : un petit réseau de segmentation (image + passe-haut + méthode [+ carte du
                   mode window]) -> grille 128 x 128, entraîné sur 80 % du train, validé sur 20 %.
 
@@ -155,6 +158,88 @@ def mode_window(args, train, test):
              "seuils": {k: round(float(v), 3) for k, v in seuils.items()}}, sc)
 
 
+# ----------------------------------------------------------------------------- mode direct
+@torch.no_grad()
+def carte_directe(wm, meth, img_u8, msg, res, dev):
+    """Corrélation au message des logits par position (sans fenêtres), à la résolution d'entrée res.
+    PixelSeal : ConvNeXt + tête linéaire ; TrustMark : ResNet-50 layer4 + fc. Renvoie une carte 128 x 128."""
+    x = torch.from_numpy(img_u8).permute(2, 0, 1)[None].float().div(255).to(dev)
+    signe = torch.from_numpy(msg.astype(np.float32) * 2 - 1).to(dev)
+    if res != 512:
+        x = F.interpolate(x, size=(res, res), mode="bilinear", align_corners=False, antialias=True)
+    if meth == "pixelseal":
+        d = wm.det
+        emb = d.pixel_decoder.output_upscaling(d.convnext(d.preprocess(x)))
+        lin = d.pixel_decoder.linear
+        pp = (torch.einsum("bchw,oc->bohw", emb, lin.weight) + lin.bias[None, :, None, None])[:, 1:]
+    else:
+        n = wm.net; h = n.maxpool(n.relu(n.bn1(n.conv1(x * 2 - 1))))
+        for k in ("layer1", "layer2", "layer3", "layer4"):
+            h = getattr(n, k)(h)
+        pp = torch.einsum("bchw,oc->bohw", h, n.fc.weight) + n.fc.bias[None, :, None, None]
+    c = (pp[0].float() * signe[:, None, None]).mean(0)
+    return F.interpolate(c[None, None], size=128, mode="bilinear", align_corners=False)[0, 0].cpu().numpy()
+
+
+def seuil_optimal(cartes, gts, n=41):
+    v = np.concatenate([c.ravel() for c in cartes])
+    return max((score([(c >= s).astype(np.uint8) for c in cartes], gts), float(s))
+               for s in np.quantile(v, np.linspace(0.02, 0.98, n)))
+
+
+def mode_direct(args, train, test):
+    """PixelSeal et TrustMark : carte de corrélation par position, meilleure résolution choisie sur le train.
+    StegaStamp (pas de sortie par position) : carte du mode window (--maps)."""
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    sys.path.insert(0, str(args.tache))
+    from wmloc.watermarks import load_watermark
+    fen = None
+    if args.maps:
+        z = np.load(args.maps)
+        fen = dict(zip(z["names"].tolist(), z["maps"].astype(np.float32)))
+    resolutions = {"pixelseal": [int(r) for r in args.res_ps.split(",")],
+                   "trustmark": [int(r) for r in args.res_tm.split(",")]}
+    choix, seuils, toutes_cartes = {}, {}, {}
+    for meth in METHODES:
+        tr = [it for it in train if it["method"] == meth]
+        te = [it for it in test if it["method"] == meth]
+        gts = [it["mask128"] for it in tr]
+        if meth == "stegastamp":
+            if fen is None:
+                print("stegastamp : pas de --maps, prédiction tout à 0"); choix[meth] = "zeros"
+                cartes = {it["image_name"]: np.zeros((128, 128), np.float32) for it in tr + te}
+                seuils[meth] = 0.5
+            else:
+                cartes = {it["image_name"]: fen[it["image_name"]] for it in tr + te}
+                sc, seuils[meth] = seuil_optimal([cartes[it["image_name"]] for it in tr], gts)
+                choix[meth] = "window"; print(f"stegastamp : window -> mIoU train {sc:.4f}")
+            toutes_cartes.update(cartes); continue
+        wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
+        best = None
+        for r in resolutions[meth]:
+            cartes = {it["image_name"]: carte_directe(wm, meth, it["image"], it["message"], r, dev) for it in tr + te}
+            sc, s = seuil_optimal([cartes[it["image_name"]] for it in tr], gts)
+            print(f"{meth} : résolution {r} -> mIoU train {sc:.4f} (seuil {s:+.3f})")
+            if best is None or sc > best[0]:
+                best = (sc, s, r, cartes)
+        _, seuils[meth], choix[meth], cartes = best
+        toutes_cartes.update(cartes)
+        del wm; torch.cuda.empty_cache() if torch.cuda.is_available() else None
+    preds = [(toutes_cartes[it["image_name"]] >= seuils[it["method"]]).astype(np.uint8) for it in train]
+    sc = score(preds, [it["mask128"] for it in train])
+    for meth in METHODES:
+        v = [(p, it) for p, it in zip(preds, train) if it["method"] == meth]
+        print(f"  {meth}: {score([p for p, _ in v], [it['mask128'] for _, it in v]):.4f} ({choix[meth]})")
+    print(f"mIoU train (un seuil par méthode réglé dessus) : {sc:.4f}")
+    out_dir = Path(args.out_dir)
+    np.savez_compressed(out_dir / "direct_maps.npz", names=np.array(list(toutes_cartes)),
+                        maps=np.stack(list(toutes_cartes.values())).astype(np.float16))
+    ecrire_soumission(test, [(toutes_cartes[it["image_name"]] >= seuils[it["method"]]).astype(np.uint8)
+                             for it in test], out_dir / "direct.pt")
+    journal({"mode": "direct", "resolutions": {k: v for k, v in choix.items()},
+             "seuils": {k: round(float(v), 3) for k, v in seuils.items()}}, sc)
+
+
 # ----------------------------------------------------------------------------- mode unet
 def bloc(cin, cout, stride=1):
     return nn.Sequential(nn.Conv2d(cin, cout, 3, stride, 1, bias=False), nn.BatchNorm2d(cout), nn.GELU(),
@@ -257,13 +342,15 @@ def mode_unet(args, train, test):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     off = Path(os.environ.get("OFFICIEL", ".")) / "Hackathon_Watermark_Localisation_Task"
-    ap.add_argument("--mode", choices=["window", "unet"], required=True)
+    ap.add_argument("--mode", choices=["window", "direct", "unet"], required=True)
     ap.add_argument("--tache", type=Path, default=off, help="dossier de la tâche (wmloc, models)")
     ap.add_argument("--data", type=Path, default=off / "release")
     ap.add_argument("--out_dir", default=str(off / "output"))
     ap.add_argument("--tailles", default="128,256", help="mode window : tailles des fenêtres")
     ap.add_argument("--pas", type=int, default=64, help="mode window : pas des fenêtres")
-    ap.add_argument("--maps", default=None, help="mode unet : window_maps.npz comme entrée en plus")
+    ap.add_argument("--maps", default=None, help="modes unet et direct : window_maps.npz (entrée en plus / StegaStamp)")
+    ap.add_argument("--res_ps", default="224,256,320,384,512", help="mode direct : résolutions essayées, PixelSeal")
+    ap.add_argument("--res_tm", default="192,224,245,288,320", help="mode direct : résolutions essayées, TrustMark")
     ap.add_argument("--epochs", type=int, default=40)
     ap.add_argument("--bs", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-3)
@@ -276,7 +363,7 @@ def main():
         args.out_dir = "/tmp/wm_fake"; args.pas = 192; args.tailles = "256"
     Path(args.out_dir).mkdir(parents=True, exist_ok=True)
     train, test = charger(args)
-    (mode_window if args.mode == "window" else mode_unet)(args, train, test)
+    {"window": mode_window, "direct": mode_direct, "unet": mode_unet}[args.mode](args, train, test)
 
 
 if __name__ == "__main__":
