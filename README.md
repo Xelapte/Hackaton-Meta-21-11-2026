@@ -27,6 +27,9 @@ setup/nettoyer_depot.sh   une fois par clone : retire les anciens fichiers pass�
 common/scores.py          journal des scores partagé : python -m common.scores
 common/dashboard.py       tableau de bord HTML des scores
 
+docs/references/          énoncés officiels des tâches 1 et 2, article MET (2410.20247)
+watermark/README.md, met/README.md   index des scripts de chaque tâche (retenu / outil / rejeté)
+
 archive/                  code de préparation écrit d'après les papiers (avant de connaître les vraies
                           tâches) : ne plus l'utiliser, voir archive/README.md
 ```
