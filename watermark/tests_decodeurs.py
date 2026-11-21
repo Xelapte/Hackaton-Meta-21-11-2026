@@ -8,6 +8,9 @@
                      marge de décodage de l'image entière (moyenne de logit x signe du bit). Boîte d'un vrai trou
                      (attendu ~0) contre boîte de même taille en zone tatouée (attendu < 0). Si ça sépare, on peut
                      chercher les trous par occlusion.
+  --test masque      (H7a) Images partielles du train : décoder la boîte vraie en la DÉCOUPANT (échelle changée,
+                     comme H3a) contre en gardant l'image entière à 512 px et en floutant (ou grisant) tout ce
+                     qui est HORS de la boîte (échelle conservée) ; témoin : même masquage autour d'une boîte au hasard.
   --test invariance  (H4) Images full du train : précision de bits de l'image, de ses miroirs et rotations.
                      Décide si l'augmentation miroir / rotation est permise.
 
@@ -84,7 +87,7 @@ def auc(pos, neg):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     off = Path(os.environ.get("OFFICIEL", ".")) / "Hackathon_Watermark_Localisation_Task"
-    ap.add_argument("--test", choices=["oracle", "invariance", "occlusion"], required=True)
+    ap.add_argument("--test", choices=["oracle", "invariance", "occlusion", "masque"], required=True)
     ap.add_argument("--flou", type=float, default=4.0, help="occlusion : rayon du flou gaussien (pixels)")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--tache", type=Path, default=off)
@@ -118,6 +121,8 @@ def main():
             if meth == "stegastamp":
                 print(f"stegastamp : fournisseurs ONNX {wm.sess.get_providers()}", flush=True)
         full = args.test in ("invariance", "occlusion")
+        if args.test == "masque":
+            from PIL import ImageFilter
         its = [m for m in meta if m["method"] == meth and bool(m["full_watermark"]) == full]
         its = [its[i] for i in rng.permutation(len(its))[:args.n]]
         res = {}; t0 = time.time(); ncrops = 0
@@ -133,6 +138,25 @@ def main():
                     res.setdefault(nom, []).append(float(bits_justes(wm, [c], msg, dev)[0]))
                 res.setdefault("_taille", []).append((b[1] - b[0]) * (b[3] - b[2]) / 512 ** 2)
                 ncrops += len(crops)
+            elif args.test == "masque":
+                b = boite_principale(M[m["image_name"]])
+                if b is None:
+                    continue
+                v = variantes(b, rng)
+                if "hasard" not in v:
+                    continue
+                flou = np.asarray(Image.fromarray(img).filter(ImageFilter.GaussianBlur(args.flou)))
+                gris = np.full_like(img, 128)
+                def garde(bb, fond):
+                    o = fond.copy(); o[bb[0]:bb[1], bb[2]:bb[3]] = img[bb[0]:bb[1], bb[2]:bb[3]]; return o
+                vb, hb = v["vraie"], v["hasard"]
+                cas = {"découpe vraie": img[vb[0]:vb[1], vb[2]:vb[3]], "masque flou vraie": garde(vb, flou),
+                       "masque gris vraie": garde(vb, gris), "masque flou hasard": garde(hb, flou),
+                       "image entière": img}
+                for nom, c in cas.items():
+                    res.setdefault(nom, []).append(float(bits_justes(wm, [c], msg, dev)[0]))
+                res.setdefault("_taille", []).append((vb[1] - vb[0]) * (vb[3] - vb[2]) / 512 ** 2)
+                ncrops += len(cas)
             elif args.test == "occlusion":
                 from PIL import ImageFilter
                 g = M[m["image_name"]]
@@ -177,6 +201,12 @@ def main():
             v = np.array(v)
             lib = "variation relative de la marge" if args.test == "occlusion" else "bits justes"
             print(f"  {nom:18s}: {lib} moyenne {v.mean():.3f}  q10/50/90 {np.quantile(v, [.1, .5, .9]).round(3)}", flush=True)
+        if args.test == "masque" and "masque flou vraie" in res:
+            print(f"  AUC masque flou vraie / hasard : {auc(res['masque flou vraie'], res['masque flou hasard']):.3f} ; "
+                  f"AUC découpe vraie / masque flou hasard : {auc(res['découpe vraie'], res['masque flou hasard']):.3f}", flush=True)
+            mv = np.array(res["masque flou vraie"]); dv = np.array(res["découpe vraie"])
+            print(f"  masque flou > découpe : {(mv > dv).mean():.2f} des images ; max(masque, découpe) > 0,75 : "
+                  f"{(np.maximum(mv, dv) > .75).mean():.2f} (découpe seule : {(dv > .75).mean():.2f})", flush=True)
         if args.test == "occlusion" and "trou" in res:
             print(f"  AUC (trou > zone tatouée) : {auc(res['trou'], res['zone tatouée']):.3f} ; "
                   f"taille médiane de la boîte {np.median(res['_taille']):.3f}", flush=True)

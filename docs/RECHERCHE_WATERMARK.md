@@ -48,6 +48,21 @@
 | H6a | Trous des images full par occlusion : flouter une boîte et mesurer la variation de la marge de décodage de l'image entière | 1 (test, 15 images / méthode, CPU) | — | AUC 0,67 | AUC 0,80 | AUC 0,72 | **Rejetée** : effet minuscule (médiane −0,1 % à −3 %) devant la dispersion ; une recherche parmi des centaines de boîtes ne trouverait pas le trou. |
 | H1 | Cartes par position (corrélation au message connu) : une carte seule + un seuil par méthode | 13 cartes évaluées | meilleures : PS `ps_512` 0,4715 ± 0,008 ; TM `tm_245` 0,4649 ± 0,007 ; SS `ss_16` 0,3634 ± 0,024 | AUC 0,89 (0,94 à 256 px) | AUC 0,91 | AUC 0,66 | Gardée (PS/TM). Fenêtres : PS 0,453, TM 0,281, SS 0,255. AUC élevée mais portée par les grandes zones. |
 
+## Analyse d'erreurs de H3b (`watermark/analyse_erreurs.py`, repli U-Net, 510 images)
+
+- **Régime** (full / partiel) : presque parfait ; oracle régime parfait −0,003 → pas un levier.
+- **Boîtes** (images partielles) : IoU médiane de la boîte choisie PS 0,015, TM 0,29, SS 0,000. Oracle « meilleure des 20
+  boîtes enregistrées » +0,035 ; oracle « boîte vraie » **+0,153** → le levier est la recherche, pas le classement.
+- **Par forme de zone** : TrustMark trouve **84 %** des rectangles (score de la meilleure boîte 1,00) et 0 % des objets non
+  rectangulaires (transplantés). PixelSeal et StegaStamp ne trouvent que 33 % / 5 % des rectangles, petits (médiane 1,3 % / 2,2 %
+  de l'image, ~60–80 px) : la grille (≥ 48 / 64 px, pas d'une demi-taille) est trop grossière, un décalage de 25 % suffit
+  à tomber au hasard (H3a).
+- **Images full** : U-Net ≥ tout à 1 (SS 0,524 contre 0,456) ; borne « trous parfaits » +0,26 (hors de portée : H6a).
+- **H7a — décodage masqué** (garder l'image à 512 px, flouter / griser hors de la boîte vraie, pour respecter l'échelle des objets
+  transplantés) : bits justes ≈ hasard pour les 3 méthodes (0,50–0,52) → **rejetée**.
+- **Piste restante** : recherche fine des petits rectangles PS et SS (boîtes dès 32 px, pas d'un quart, raffinement serré),
+  même règle à 2 seuils, sans paramètre nouveau ; gain estimé +0,01 à +0,03 ; plusieurs heures de GPU (run de nuit).
+
 ## Essais avant le protocole (plis non gelés, à ne pas comparer directement)
 
 - Mode direct (17h20) : 0,4339 (seuils et résolution réglés sur tout le train : optimiste).
@@ -55,4 +70,4 @@
 - U-Net + synthétique v1 (supports pris aussi dans le test, trous = original remis) : 0,4691 → écarté.
 - Canal de détection PixelSeal (0,33), re-tatouage PixelSeal / TrustMark (~0,27) : rejetés.
 
-**Compteur de configurations essayées : ~37** (résolutions, tailles de bloc, 3 U-Net, synthétique v1, 13 cartes).
+**Compteur de configurations essayées : ~38** (résolutions, tailles de bloc, 3 U-Net, synthétique v1, 13 cartes).
