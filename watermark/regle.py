@@ -114,10 +114,13 @@ def charger(args, split):
     off = Path(args.out_dir)
     meta = json.loads((args.data / split / "metadata.json").read_text())
     R = {}
-    for f in sorted((off / "rect").glob(f"{split}_*.npz")):
-        z = np.load(f)
-        for n, b, s in zip(z["names"].tolist(), z["boites"], z["full"]):
-            R[n] = (b[0], float(s))
+    dossiers = ["rect"] + (["rect_fin"] if getattr(args, "fin", False) else [])
+    for dos in dossiers:                         # meilleure boîte des recherches grossière et fine
+        for f in sorted((off / dos).glob(f"{split}_*.npz")):
+            z = np.load(f)
+            for n, b, s in zip(z["names"].tolist(), z["boites"], z["full"]):
+                if n not in R or b[0][4] > R[n][0][4]:
+                    R[n] = (b[0], float(s) if n not in R else R[n][1])
     meta = [m for m in meta if m["image_name"] in R]
     noms = [m["image_name"] for m in meta]; meths = np.array([m["method"] for m in meta])
     if args.repli == "unet":                     # probabilités hors pli du U-Net (train) / moyenne des 5 modèles (test)
@@ -157,6 +160,7 @@ def main():
     ap.add_argument("--cartes", default=str(off / "output" / "cartes_feats.npz"))
     ap.add_argument("--repli", choices=["carte", "unet"], default="carte", help="prédiction de repli (hors boîte)")
     ap.add_argument("--oof", default=str(off / "output" / "unet_h5a_feats_oof.npz"), help="--repli unet : sorties du U-Net")
+    ap.add_argument("--fin", action="store_true", help="H8b : ajouter la recherche fine (output/rect_fin)")
     ap.add_argument("--menus", action="store_true", help="H3c : menus étendus (sans gain démontré, 21/11 19h10)")
     ap.add_argument("--predire", action="store_true")
     ap.add_argument("--sortie", default=None, help="soumission (défaut : <out_dir>/regle_h3c.pt)")
@@ -171,6 +175,11 @@ def main():
         s_carte, _ = evaluer_imbrique(charger(a2, "train")[0], menus=False)
         print(f"H3b (repli carte)               : {texte(resume(s_carte, D.pi, D.meths))}", flush=True)
         print(f"gain repli unet / carte : {gain_robuste(s_carte, s_b, D.pi)}", flush=True)
+    if args.fin:                                 # comparaison à H3b sans la recherche fine, mêmes images
+        a3 = argparse.Namespace(**{**vars(args), "fin": False})
+        s_sans, _ = evaluer_imbrique(charger(a3, "train")[0], menus=False)
+        print(f"H3b sans recherche fine         : {texte(resume(s_sans, D.pi, D.meths))}", flush=True)
+        print(f"gain recherche fine (H8b) : {gain_robuste(s_sans, s_b, D.pi)}", flush=True)
     s_c, choix = (s_b, choix_b)
     if args.menus:
         s_c, choix = evaluer_imbrique(D, menus=True)
@@ -196,11 +205,11 @@ def main():
             sel = Dt.meths == m; P[sel] = predire(Dt.sous(sel), params[m])
         sys.path.insert(0, str(RACINE))
         from watermark.baseline import ecrire_soumission, journal
-        sortie = args.sortie or str(Path(args.out_dir) / f"regle_h3b_{args.repli}{'_menus' if args.menus else ''}.pt")
+        sortie = args.sortie or str(Path(args.out_dir) / f"regle_h3b_{args.repli}{'_fin' if args.fin else ''}{'_menus' if args.menus else ''}.pt")
         ecrire_soumission([{"image_name": n} for n in Dt.noms], list(P.astype(np.uint8)), sortie)
         Path(sortie.replace(".pt", "_params.json")).write_text(json.dumps(params, indent=1, ensure_ascii=False))
         print("paramètres (réglés sur tout le train) :", params, flush=True)
-        journal({"mode": "regle_h3b", "repli": args.repli, "menus": args.menus, "params": params,
+        journal({"mode": "regle_h3b", "repli": args.repli, "fin": args.fin, "menus": args.menus, "params": params,
                  "protocole": "plis gelés, imbriqué"}, float(s_c.mean()))
 
 

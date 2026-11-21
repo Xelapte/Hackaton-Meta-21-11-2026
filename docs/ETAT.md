@@ -31,10 +31,10 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 
 | GPU | Commande (nom dans la file) | Quoi | Déposée par | Fin prévue |
 |---|---|---|---|---|
-| 0 | | | | |
+| 0 | wm_fin_ss0, wm_fin_ps0 | Tâche 1 : recherche fine des rectangles (train) | huang25 | ~21h25 |
 | 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
+| 2 | wm_fin_ss1, wm_fin_ps1 | Tâche 1 : recherche fine (train) | huang25 | ~21h25 |
+| 3 | wm_fin_ss2, wm_fin_ss3 | Tâche 1 : recherche fine (train) ; puis le test (~2 h 25) si le gain est robuste | huang25 | ~21h25 (test ~23h55) |
 
 ## Qui tient le nœud
 
@@ -59,3 +59,4 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 - 17h46 — **Soumission tatouage n° 1136** (demandée par huang25) : `output/unet_feats_cv5.pt`, tag `watermark-soumis-17h` (commit 9d78d06). Public **0,4804** (avant : 0,3321). Hors pli local : 0,4705.
 - 18h15 — Tâche 1 : protocole anti-sur-apprentissage (plis gelés `watermark/splits.json`, journal `docs/RECHERCHE_WATERMARK.md`). GPU 3 attribué au watermark par huang25.
 - 20h04 — **Soumission tatouage n° 1412** (demandée par l'utilisateur) : H3b, rectangle + repli carte (`regle.py --predire --repli carte`, `output/regle_h3b_carte.pt`). Public **0,5042** (avant : 0,4804). Protocole (plis gelés) : 0,5065 ± 0,0092. Tag `watermark-soumis-20h`.
+- 20h06 — Tâche 1 : recherche fine (H8b) lancée sur les GPU 0, 2 et 3 (accord de huang25), morceaux de <= 40 min pour laisser passer l'unlearning sur le GPU 0.
