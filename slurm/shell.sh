@@ -1,4 +1,6 @@
 #!/bin/bash
+# Pour le COORDINATEUR seulement : Slurm ne laisse entrer dans un job que la personne qui
+# l'a lancé. Les autres membres passent par slurm/soumettre.sh (file d'attente).
 # Ouvre un terminal sur le nœud réservé, limité à un seul GPU (non testé : à valider à 12h).
 #   bash slurm/shell.sh <jobid> <gpu>        ex. : bash slurm/shell.sh 1234567 1
 # <jobid> : numéro de la réservation du coordinateur du nœud (squeue -A <projet>).

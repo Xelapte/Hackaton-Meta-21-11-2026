@@ -1,4 +1,4 @@
-"""Journal des scores : chaque run ajoute une ligne à results/scores.csv.
+"""Journal des scores : chaque run ajoute une ligne au journal partagé (SCORES_CSV).
 
 Utilisation dans un script :
     from common.scores import log_score
@@ -17,7 +17,10 @@ import os
 import pathlib
 import subprocess
 
-CSV = pathlib.Path(__file__).resolve().parents[1] / "results" / "scores.csv"
+# Journal partagé par toute l'équipe : SCORES_CSV est fixé dans slurm/env.sh
+# (<dossier_projet>/scores.csv). Sans cette variable : results/scores.csv du clone.
+CSV = pathlib.Path(os.environ.get("SCORES_CSV") or
+                   pathlib.Path(__file__).resolve().parents[1] / "results" / "scores.csv")
 FIELDS = ["heure", "tache", "config", "score", "commit", "notes"]
 
 

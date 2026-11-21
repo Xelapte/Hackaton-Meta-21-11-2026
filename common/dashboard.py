@@ -1,4 +1,4 @@
-"""Tableau de bord statique : transforme results/scores.csv en une page HTML.
+"""Tableau de bord statique : transforme le journal des scores (SCORES_CSV) en une page HTML.
 
 Pas de serveur, pas d'internet : on régénère la page et on l'ouvre.
     python -m common.dashboard              # écrit results/dashboard.html

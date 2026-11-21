@@ -20,7 +20,7 @@ for v in nf4:3 int8:4 watermark:5; do
     python met/generate_hf.py --model "$MODEL_PATH" --prompts "$P" --variant "${v%:*}" \
         --seed "${v#*:}" --out "$O/Q_${v%:*}.npz"
 done
-# 3) Comparaisons (chaque appel écrit une ligne dans results/scores.csv)
+# 3) Comparaisons (chaque appel écrit une ligne dans le journal des scores)
 python met/compare.py "$O/P.npz" "$O/P2.npz" --name controle
 for v in nf4 int8 watermark; do
     python met/compare.py "$O/P.npz" "$O/Q_$v.npz" --name "$v"

@@ -4,14 +4,14 @@
 
 1. **Un score sur chaque tâche, vite.** Commence par une solution simple qui passe les tests des trois tâches, avant d'en perfectionner une. Si le classement additionne les tâches, un zéro coûte plus cher que n'importe quelle optimisation.
 2. **Lis la métrique avant le papier.** L'énoncé et le code de score des tests disent ce qui compte. Note tout ce qui diffère du cadre du papier : données, attaques, budget, métrique.
-3. **Une commande par tâche reproduit le score** et écrit une ligne dans `results/scores.csv`.
+3. **Une commande par tâche reproduit le score** et écrit une ligne dans le journal partagé (`$DIR/scores.csv`).
 4. **Investis là où le gain par heure est le plus grand.** Toutes les deux à trois heures, regarde le tableau des scores et réattribue le GPU 3 (joker) et les personnes.
 
 ## Le planning
 
 | Quand | Phase | Ce qu'on fait |
 |---|---|---|
-| Sam. 12h–13h | Mise en place | Lire les énoncés et la métrique, lancer `slurm/test.sh`, confirmer les responsables. |
+| Sam. 12h–13h | Mise en place | Lire les énoncés et la métrique, le coordinateur lance `slurm/test.sh` puis `slurm/noeud.sh`, confirmer les responsables. |
 | 13h–16h | Baselines | **Objectif : un score sur les trois tâches avant 16h.** |
 | 16h–22h | Améliorations | Les leviers qui rapportent le plus ; point d'équipe à 19h pour réattribuer le joker. |
 | 22h–7h | Nuit | Les longs calculs partent avant de dormir : génération, balayages d'hyperparamètres. Une personne vérifie vers 3h. |

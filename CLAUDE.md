@@ -27,10 +27,10 @@ Toutes les équipes ont les mêmes papiers. Les papiers donnent la baseline ; le
 2. **Rien sur les ordinateurs personnels.** Ni paquet, ni modèle, ni poids, ni données. Si tu tournes sur l'ordinateur d'un membre, tu modifies le code et tu fais `git push`, c'est tout : l'exécution a lieu sur le cluster.
 3. **Pas de calcul lourd sur le nœud de login** : il est partagé avec tous les utilisateurs du centre. Tout ce qui utilise un GPU passe par Slurm (`docs/CLUSTER.md`).
 4. **Un GPU par tâche.** Fixe toujours `CUDA_VISIBLE_DEVICES`. Dans le code, écris `"cuda"`, jamais `"cuda:2"` : le GPU choisi s'appelle toujours `cuda:0`.
-5. **Chaque run écrit son score** avec `common.scores.log_score(tache, config, score, notes)`. Un résultat qui n'est pas dans `results/scores.csv` n'existe pas pour l'équipe.
+5. **Chaque run écrit son score** avec `common.scores.log_score(tache, config, score, notes)`. Le journal est partagé (`$DIR/scores.csv`, via `SCORES_CSV` dans `slurm/env.sh`). Un résultat qui n'y est pas n'existe pas pour l'équipe.
 6. **Ne commite jamais** de poids, de modèles, de données, `env/`, de jetons (Hugging Face, GitHub) ni de grosses sorties. Le `.gitignore` les exclut déjà : ne le contourne pas.
 7. **Ne soumets rien aux tests officiels sans l'accord d'un humain** : le nombre de soumissions peut être limité.
-8. **Petits tests libres, le reste par le coordinateur du nœud.** Un petit test, c'est sur le GPU de la tâche, dans la réservation déjà ouverte, en moins de 30 minutes : tu peux le lancer et tu le notes dans `docs/ETAT.md`. Tout le reste demande que l'humain ait confirmé l'accord du coordinateur du nœud : un run plus long ou de nuit, une vague, un nouveau job, un autre GPU (y compris le joker), une annulation de job, un gros téléchargement, une soumission officielle. Si tu ne sais pas si l'accord a été donné, demande à l'humain.
+8. **Petits tests libres, le reste par le coordinateur du nœud.** Un petit test, c'est une commande déposée dans la file du GPU de la tâche (`slurm/soumettre.sh`), de moins de 30 minutes, dont tu suis le journal : tu peux la lancer. Tout le reste demande que l'humain ait confirmé l'accord du coordinateur du nœud : un run plus long ou de nuit, une vague, un nouveau job, un autre GPU (y compris le joker), une annulation de job, un gros téléchargement, une soumission officielle. Si tu ne sais pas si l'accord a été donné, demande à l'humain.
 9. **Pas d'affirmation sans mesure.** Ne dis pas qu'un changement améliore le score tant qu'un run ne l'a pas montré dans `scores.csv`.
 
 ## L'arborescence
@@ -44,29 +44,31 @@ common/smoke_test.py       test de fumée GPU (lancé par slurm/test.sh)
 setup/                     install_env.sh, download_all.sh, install_pixelseal.sh (nœud de login)
 slurm/env.sh               variables communes : DIR, MODEL_PATH, IMAGES, HF_HUB_OFFLINE=1
 slurm/test.sh              job de test de 10 minutes
-slurm/vague.sh             un processus par GPU : lance met/, scrub/ et pixelseal/run.sh
-slurm/shell.sh             terminal interactif limité à un GPU, dans une réservation
-pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = ce que la vague exécute
-results/scores.csv         journal des scores (versionné)
+slurm/noeud.sh             job du coordinateur : garde le nœud, une file d'attente par GPU (worker.sh)
+slurm/soumettre.sh         déposer une commande dans la file d'un GPU
+slurm/file.sh, annuler.sh  état des files ; arrêter la commande en cours
+slurm/vague.sh, shell.sh   secours (coordinateur seulement)
+setup/partage.sh           crée les files, droits du groupe (une fois)
+pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = la baseline complète
 logs/                      sorties des jobs (non versionnées)
 ```
 
-Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$DIR`) : `env/`, `models/`, `data/`, `ckpts/`, `repos/` et `hf_cache/`. Le dépôt contient seulement un lien symbolique `ckpts`, qui pointe vers `$DIR/ckpts`.
+Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$DIR`) : `env/`, `models/`, `data/`, `ckpts/`, `repos/` et `hf_cache/`. Le dépôt contient seulement un lien symbolique `ckpts`, qui pointe vers `$DIR/ckpts`. Chaque membre a son clone dans `$DIR/membres/<identifiant>/`. Les files d'attente sont dans `$DIR/queue/`, le journal des scores dans `$DIR/scores.csv`.
 
 ## Qui lance les jobs
 
-- **Le coordinateur du nœud**, un seul membre, est le seul à réserver le nœud (`salloc`) et à soumettre les jobs (`sbatch slurm/vague.sh`). Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et le double du budget.
-- **Le suppléant** prend le relais quand le coordinateur dort ou ne répond pas. Il soumet la vague suivante sous son propre compte, car Slurm ne laisse annuler un job qu'à la personne qui l'a soumis.
-- **Le responsable de chaque tâche** travaille dans un terminal limité à son GPU (`slurm/shell.sh`), prépare `<tache>/run.sh`, fait `git push`, puis prévient le coordinateur du nœud.
-- **Toi, l'agent :** ne lance jamais `sbatch`, `salloc` ni `scancel` de ta propre initiative. Prépare le `run.sh` et dis à l'humain qu'il est prêt. Ne modifie pas un `run.sh` pendant qu'une vague l'exécute : bash le lit au fur et à mesure.
+- **Le coordinateur du nœud**, un seul membre, est le seul à lancer des jobs : `sbatch slurm/noeud.sh` garde le nœud et ouvre une file d'attente par GPU. Chaque job réserve un nœud entier de 4 GPU : un deuxième job consomme un deuxième nœud et le double du budget.
+- **Le suppléant** prend le relais quand le coordinateur dort ou ne répond pas. Si le job du nœud s'arrête, il relance `slurm/noeud.sh` sous son propre compte, car Slurm ne laisse annuler un job qu'à la personne qui l'a soumis.
+- **Le responsable de chaque tâche** dépose ses commandes dans la file de son GPU (`bash slurm/soumettre.sh <gpu> <nom> <commande>`) et fait `git push` de ce qui marche. Chaque membre a son propre compte et sa propre clé SSH : personne n'entre dans le job d'un autre.
+- **Toi, l'agent :** ne lance jamais `sbatch`, `salloc` ni `scancel` de ta propre initiative. Pour un petit test, tu peux utiliser `slurm/soumettre.sh` ; pour le reste, prépare le script et dis à l'humain qu'il est prêt. Ne modifie pas un script en attente ou en cours d'exécution dans une file : il est lu au démarrage, puis au fur et à mesure.
 
 ## Le cycle de travail
 
 1. Lis `docs/ETAT.md` et le `CLAUDE.md` de la tâche.
 2. Fais une modification, de préférence derrière une option en ligne de commande, pour garder la baseline reproductible.
 3. Teste à petite échelle : `--fake` pour SCRUB, `--max_images 5` pour Pixel Seal, `--n 3 --max_tokens 20` pour MET.
-4. Lance sur le GPU de la tâche, avec `bash slurm/shell.sh <jobid> <gpu>` ou en modifiant `<tache>/run.sh` puis `sbatch slurm/vague.sh`.
-5. Vérifie que le score est bien écrit, puis compare avec `python -m common.scores`.
+4. Dépose la commande dans la file du GPU de la tâche : `bash slurm/soumettre.sh <gpu> <nom> <commande>`. Suis-la avec `bash slurm/file.sh` et `tail -f $DIR/queue/logs/<nom>.log`.
+5. Vérifie que le score est bien écrit, puis compare avec `source slurm/env.sh && python -m common.scores`.
 6. Si c'est mieux que le meilleur score : fais un commit avec un message de la forme `<tache>: <changement>, score <x> (<config>)`, puis `git push`. Si c'est moins bon : ajoute une ligne dans le journal de `docs/ETAT.md` (« essayé X, -0,02 »), pour que personne ne le relance.
 7. Mets à jour `docs/ETAT.md` : meilleur score, configuration, commit, heure.
 8. Juste après la baseline : remplace le score du kit par la métrique des tests. Objectif : les trois tâches notées avant 16h, avant toute amélioration.
@@ -77,7 +79,7 @@ Les gros fichiers vivent hors du dépôt, dans le dossier projet du cluster (`$D
 
 - **Testé, sans GPU :** `common/scores.py` (écritures simultanées), `common/dashboard.py`, `met/mmd_test.py` et `met/compare.py` (taux de faux positifs de 5 % sous H0 sur données synthétiques), et toute la chaîne SCRUB sur données factices (`--fake`).
 - **Vérifié à blanc**, sans GPU, avec un faux `python` : l'enchaînement des `run.sh` et les gardes des scripts Slurm.
-- **Jamais exécuté** (ni GPU ni poids disponibles pendant la préparation) : `pixelseal/quickstart.py`, `met/generate_vllm.py`, `met/generate_hf.py`, `slurm/shell.sh`, et les jobs Slurm sur la vraie machine. Au premier échec, lis l'erreur avant de réécrire quoi que ce soit.
+- **Jamais exécuté** (ni GPU ni poids disponibles pendant la préparation) : `pixelseal/quickstart.py`, `met/generate_vllm.py`, `met/generate_hf.py`, `slurm/shell.sh`, et les jobs Slurm sur la vraie machine. Les files d'attente (`noeud.sh`, `worker.sh`, `soumettre.sh`, `file.sh`, `annuler.sh`) ont été testées sans GPU ni Slurm : dépôt, ordre, annulation, arrêt, reprise. Au premier échec, lis l'erreur avant de réécrire quoi que ce soit.
 
 ## Le style
 

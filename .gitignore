@@ -14,7 +14,7 @@ data/
 *.bin
 *.npz
 *.zip
-# Sorties volumineuses ; results/scores.csv reste versionné
+# Sorties volumineuses (le journal des scores est dans <dossier_projet>/scores.csv)
 results/met/
 results/scrub/
 results/dashboard.html

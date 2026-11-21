@@ -7,8 +7,8 @@ Les GPU sont au centre de calcul de Jülich (JSC). On y accède par JuDoor. Les 
 | Machine | Internet | GPU | Rôle |
 |---|---|---|---|
 | Ordinateur d'un membre | oui | non | Terminal SSH, édition du code, `git push`. **Rien d'installé, rien de téléchargé.** |
-| Nœud de login (`ssh jsc`) | oui | non | **Tous** les téléchargements et installations, `git`, `sbatch`. Pas de calcul lourd. |
-| Nœud GPU | **non** | 4 × 40 Go | Exécution, via Slurm uniquement. |
+| Nœud de login (`ssh jsc`) | oui | non | **Tous** les téléchargements et installations, `git`, dépôt des commandes dans les files. Pas de calcul lourd. |
+| Nœud GPU | **non** | 4 × 40 Go | Exécution des commandes des files, dans le job du coordinateur. On ne s'y connecte pas. |
 
 Le nœud de login et le nœud GPU voient le même dossier projet, `$DIR`, placé sur un espace partagé comme `$PROJECT` ou `$SCRATCH` (à confirmer avec les organisateurs). Ce qui est téléchargé sur le nœud de login est donc lu tel quel sur le nœud GPU.
 
@@ -29,6 +29,9 @@ $DIR/ckpts/      poids de Pixel Seal (pixelseal_checkpoint.pth, videoseal_y_256b
 $DIR/models/     modèle de langage pour MET (hf download)
 $DIR/data/       CIFAR-10 et CIFAR-100
 $DIR/hf_cache/   cache Hugging Face (HF_HOME)
+$DIR/membres/    un clone du dépôt par membre
+$DIR/queue/      files d'attente des GPU (gpu0 … gpu3) et leurs journaux (logs/)
+$DIR/scores.csv  journal des scores de toute l'équipe
 ```
 
 ## L'installation, sur le nœud de login uniquement
@@ -40,36 +43,50 @@ hf auth login                                       # accès Llama ou Mistral ac
 bash setup/download_all.sh <dossier_projet> <modele_hf>
 bash setup/install_pixelseal.sh <dossier_projet>
 ln -s <dossier_projet>/ckpts ckpts                  # à la racine du dépôt
-# puis remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/vague.sh
-sbatch slurm/test.sh                                # test de fumée : regarder logs/test-<id>.out
+bash setup/partage.sh <dossier_projet>              # files d'attente et droits du groupe
+# puis remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/noeud.sh
+sbatch slurm/test.sh                                # coordinateur : test de fumée (logs/test-<id>.out)
+sbatch slurm/noeud.sh                               # coordinateur : garde le nœud, ouvre les files
 ```
 
-## Lancer sur les GPU
+## Lancer sur les GPU : les files d'attente
 
-On ne peut pas réserver moins d'un nœud entier, soit 4 GPU. Un seul membre, le « coordinateur du nœud », réserve, et les autres se partagent sa réservation. Il lance `salloc` depuis une session `tmux` : si sa session tombe, la réservation tombe avec elle.
+Chaque membre a **son propre compte et sa propre clé SSH** ; on ne partage jamais une clé. Slurm ne laisse entrer dans un job que la personne qui l'a lancé. Les autres membres ne peuvent donc pas ouvrir de terminal sur le nœud du coordinateur. D'où ce fonctionnement :
 
-**La règle.** Les petits tests sont libres : sur ton propre GPU, dans la réservation ouverte, en moins de 30 minutes. Tout le reste se fait avec l'accord du coordinateur du nœud, ou de son suppléant la nuit : run long ou de nuit, vague, nouveau job, autre GPU ou joker, annulation, gros téléchargement, soumission officielle. Il tient à jour le tableau « Ce qui tourne » de `docs/ETAT.md`.
+```
+ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --exécute--> nœud de calcul, GPU N
+                         (votre clone)              (dossier partagé)           (job slurm/noeud.sh du coordinateur)
+```
 
-**Méthode 1 : les vagues.** C'est la plus robuste.
+**Une fois.**
+
+- Le coordinateur lance `bash setup/partage.sh <dossier_projet>`, qui crée les files et ouvre le dossier au groupe du projet.
+- Chaque membre ajoute `umask 002` à son `~/.bashrc` et clone le dépôt dans `$DIR/membres/<identifiant>/`.
+- Le coordinateur lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il le relance avant la fin de `--time`. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
+
+**À chaque run**, depuis la racine de ton clone, sur le nœud de login :
 
 ```bash
-sbatch slurm/vague.sh      # GPU 0 : met/run.sh, GPU 1 : scrub/run.sh, GPU 2 : pixelseal/run.sh
-squeue -A <projet>         # état du job
-tail -f logs/gpu1-<jobid>.log
+bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : 1 scrub_lr bash scrub/run.sh
+bash slurm/file.sh                                        # état des 4 files
+tail -f $DIR/queue/logs/<nom>.log                          # suivre le run
+bash slurm/annuler.sh <gpu>                               # arrêter la commande en cours
+touch $DIR/queue/STOP                                     # coordinateur : fermer les files proprement
 ```
 
-- Pour changer d'expérience, modifie `<tache>/run.sh`.
-- Pour utiliser le GPU 3, copie un `run.sh` en changeant `OUT=…`, puis mets son chemin dans la variable `JOKER` de `vague.sh`.
+Le fonctionnement des files :
 
-**Méthode 2 : un terminal dans la réservation.** C'est la plus pratique pour déboguer.
+- Une file exécute une commande à la fois, dans l'ordre de dépôt, avec `slurm/env.sh` chargé et `CUDA_VISIBLE_DEVICES` fixé.
+- Pour plusieurs runs en parallèle sur un GPU, mets-les dans un même script avec `&` puis `wait`.
+- La commande lit les fichiers au démarrage, pas au dépôt. Ne modifie pas un script en attente ou en cours.
+- Le journal des scores est partagé : `SCORES_CSV=$DIR/scores.csv`, fixé dans `slurm/env.sh`.
 
-```bash
-bash slurm/shell.sh <jobid> <gpu>   # srun --overlap, CUDA_VISIBLE_DEVICES=<gpu>
-source slurm/env.sh
-python -c "import torch; print(torch.cuda.device_count())"   # doit afficher 1
-```
+**La règle.** Les petits tests sont libres : dans la file de ton propre GPU, en moins de 30 minutes, en suivant le journal. Tout le reste se fait avec l'accord du coordinateur du nœud, ou de son suppléant la nuit : run long ou de nuit, autre GPU ou joker, annulation de la commande d'un autre, job Slurm, gros téléchargement, soumission officielle.
 
-`slurm/shell.sh` n'a pas été testé. Si Slurm refuse `--overlap`, repasse aux vagues.
+Les files ont été testées sans GPU : dépôt, ordre, annulation, arrêt, reprise après interruption. Elles restent à valider sur la vraie machine. Les solutions de secours :
+
+- `sbatch slurm/vague.sh`, lancé par le coordinateur, exécute le `run.sh` de chaque tâche ;
+- `slurm/shell.sh`, pour le coordinateur seulement, ouvre un terminal dans son propre job.
 
 Les partitions : `develbooster` pour les tests courts, `booster` pour les longs. Ce sont les noms sur JUWELS Booster : adapte-les aux consignes des organisateurs.
 

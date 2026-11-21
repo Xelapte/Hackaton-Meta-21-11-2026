@@ -3,7 +3,7 @@
 Usage, depuis la racine du dépôt d'équipe (le dossier ckpts/ des poids doit être
 dans le dossier courant, voir la fiche bootstrap Pixel Seal) :
     python pixelseal/quickstart.py --images <dossier_images> [--scaling_w 0.2]
-Écrit une ligne dans results/scores.csv (score = bits justes moyens sur les attaques).
+Écrit une ligne dans le journal des scores (SCORES_CSV) (score = bits justes moyens sur les attaques).
 """
 import argparse
 import io

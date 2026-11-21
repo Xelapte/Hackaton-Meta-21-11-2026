@@ -1,6 +1,6 @@
 # État du travail
 
-Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Mets-le à jour en partant : ce qui a été fait, ce qui tourne, ce qui reste à faire, avec l'heure. Garde-le court : seuls les meilleurs scores et les décisions y figurent ; le détail est dans `results/scores.csv`.
+Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Mets-le à jour en partant : ce qui a été fait, ce qui tourne, ce qui reste à faire, avec l'heure. Garde-le court : seuls les meilleurs scores et les décisions y figurent ; le détail est dans le journal partagé `$DIR/scores.csv`.
 
 ## Ce qu'on sait des tests
 
@@ -22,9 +22,9 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 ## Ce qui tourne en ce moment
 
-Tenu à jour par le coordinateur du nœud. Les petits tests (moins de 30 minutes, sur son propre GPU) sont libres : ajoutez-les ici. Tout le reste se fait avec son accord.
+Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et à la nuit ; il est tenu par le coordinateur du nœud. Les petits tests (moins de 30 minutes, dans la file de son propre GPU) sont libres ; tout le reste se fait avec son accord.
 
-| GPU | Job ou terminal | Quoi | Lancé par | Fin prévue |
+| GPU | Commande (nom dans la file) | Quoi | Déposée par | Fin prévue |
 |---|---|---|---|---|
 | 0 | | | | |
 | 1 | | | | |
@@ -34,6 +34,8 @@ Tenu à jour par le coordinateur du nœud. Les petits tests (moins de 30 minutes
 ## À faire
 
 - [ ] Remplir `slurm/env.sh` et les lignes `#SBATCH`, puis faire passer `slurm/test.sh`.
+- [ ] `setup/partage.sh`, un clone par membre dans `$DIR/membres/`, `umask 002` pour tous.
+- [ ] `sbatch slurm/noeud.sh` : `bash slurm/file.sh` montre 4 files actives.
 - [ ] Baseline Pixel Seal adaptée à la métrique des tests.
 - [ ] Baseline MET adaptée à la métrique des tests.
 - [ ] Baseline SCRUB adaptée à la métrique des tests.

@@ -1,4 +1,5 @@
 #!/bin/bash
+# SECOURS si les files d'attente (slurm/noeud.sh) ne marchent pas.
 # Une « vague » : un processus par GPU, en parallèle. Depuis la racine du dépôt :
 #   sbatch slurm/vague.sh
 # Remplissez d'abord slurm/env.sh et les valeurs entre chevrons ci-dessous.

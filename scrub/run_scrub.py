@@ -6,7 +6,7 @@ Usage, depuis la racine du dépôt :
     python scrub/run_scrub.py ... --retrain_ckpt results/scrub/retrain_class.pt
     python scrub/run_scrub.py --fake --original /tmp/test.pt --n_epochs 2   # test CPU
 Mesures : erreurs test / retain / forget, et MIA de base (forget contre test de la
-même classe ; idéal = 50 %). Écrit une ligne dans results/scores.csv.
+même classe ; idéal = 50 %). Écrit une ligne dans le journal des scores (SCORES_CSV).
 """
 import argparse
 import copy
