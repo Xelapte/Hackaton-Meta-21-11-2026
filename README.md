@@ -1,48 +1,137 @@
 # Kit pré-hackathon (v2)
 
-Squelette de dépôt d'équipe et scripts de préparation (fiches 5 à 8).
+Dépôt d'équipe pour le hackathon : trois tâches obligatoires, chacune notée par les tests du jury.
 
+| Tâche | Papier | Dossier | GPU |
+|---|---|---|---|
+| Tatouage d'images | Pixel Seal (arXiv 2512.16874) | `pixelseal/` | 2 |
+| Audit d'API de modèles de langage | Model Equality Testing (arXiv 2410.20247) | `met/` | 0 |
+| Désapprentissage (machine unlearning) | SCRUB (arXiv 2302.09880) | `scrub/` | 1 |
+
+Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le garde pour la démo.
+
+---
+
+## ⚠️ La règle n°1 : tout se fait sur le nœud de login, rien en local
+
+**On n'installe et on ne lance RIEN sur nos ordinateurs personnels** : ni `pip install`, ni modèle, ni poids, ni données, ni script Python.
+
+| Où | Ce qu'on y fait |
+|---|---|
+| **Ordinateur perso** | Uniquement `ssh jsc` pour se connecter. On peut aussi y éditer le code puis faire `git push`, rien de plus. |
+| **Nœud de login** (`ssh jsc`) | **Tout le reste** : `git clone` et `git pull`, installations, téléchargements (`pip`, `wget`, `hf download`, jeux de données), `sbatch` pour lancer les jobs. |
+| **Nœuds GPU** | L'exécution des calculs, lancée depuis le nœud de login avec `sbatch` (Slurm). **Ils n'ont pas internet** : un téléchargement y fait planter le script. |
+
+Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est partagé avec tout le centre. Tout ce qui utilise un GPU passe par Slurm (`slurm/`).
+
+Les gros fichiers (`env/`, `models/`, `data/`, `ckpts/`, `repos/`, `hf_cache/`) vivent dans le dossier projet du cluster (`$DIR`), jamais dans le dépôt.
+
+---
+
+## L'installation (sur le nœud de login, une seule fois pour l'équipe)
+
+Toutes les commandes se lancent depuis la racine du dépôt :
+
+```bash
+ssh jsc
+git clone git@github.com:Xelapte/Hackaton-Meta-21-11-2026.git && cd Hackaton-Meta-21-11-2026
+bash setup/install_env.sh <dossier_projet>          # 1. environnement Python
+source <dossier_projet>/env/bin/activate            # 2. l'activer
+hf auth login                                       #    si le modèle demande un accès (Llama, Mistral)
+bash setup/download_all.sh <dossier_projet> <modele_hf>   # 3. dépôts, poids, CIFAR, modèle
+bash setup/install_pixelseal.sh <dossier_projet>    # 4. bibliothèque videoseal
+ln -s <dossier_projet>/ckpts ckpts                  # 5. lien vers les poids de Pixel Seal
+# 6. remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/vague.sh
+sbatch slurm/test.sh                                # 7. test de fumée : lire logs/test-<id>.out
 ```
-CLAUDE.md                 guide pour les agents (lire en premier), + un CLAUDE.md par tâche
-docs/                     CLUSTER.md, STRATEGIE.md, ETAT.md (état courant, à tenir à jour)
-common/smoke_test.py      test de fumée GPU (lancé par slurm/test.sh)
-common/scores.py          journal des scores : log_score(...) et python -m common.scores
-common/dashboard.py       page HTML statique des scores : python -m common.dashboard
-setup/install_env.sh      environnement Python de l'équipe (nœud de login)
-setup/download_all.sh     dépôts, poids Pixel Seal, CIFAR-10/100, modèle de langage
-setup/install_pixelseal.sh bibliothèque videoseal (après download_all.sh)
-slurm/env.sh              variables communes (dossier projet, modèle, images) à remplir
-slurm/test.sh             job de test de 10 minutes
-slurm/vague.sh            un processus par GPU : lance met/, scrub/, pixelseal/run.sh
-slurm/shell.sh            terminal interactif limité à un GPU, dans une réservation
-pixelseal/quickstart.py   baseline Pixel Seal : tatouer, attaquer, relire, score
-pixelseal/run.sh          baseline lancée sur le GPU 2 (trois forces en parallèle)
-met/mmd_test.py           test MMD-Hamming (fiche 2)
-met/generate_vllm.py      réponses de référence (fp32) ou fp16/bf16 avec vLLM
-met/generate_hf.py        variantes int8, nf4 et tatouée avec transformers
-met/compare.py            compare deux échantillons, écrit le score
-met/prompts_exemple.jsonl prompts d'exemple au format attendu
-met/run.sh                pipeline complet lancé sur le GPU 0
-scrub/scrub.py            SCRUB, SCRUB+R, attaque d'appartenance (fiche 3)
-scrub/cifar.py            ResNet-18 pour CIFAR, données, entraînement, évaluation
-scrub/train_original.py   modèle original et réentraînement de référence
-scrub/run_scrub.py        SCRUB + SCRUB+R + mesures, écrit le score
-scrub/run.sh              pipeline complet lancé sur le GPU 1
-logs/ results/            sorties des jobs, scores.csv et dashboard.html
-```
 
-Ordre de préparation (nœud de login, depuis la racine du dépôt) :
+---
 
-1. `bash setup/install_env.sh <dossier_projet>`
-2. `source <dossier_projet>/env/bin/activate`
-3. `bash setup/download_all.sh <dossier_projet> <modele_hugging_face>`
-4. `bash setup/install_pixelseal.sh <dossier_projet>`
-5. `ln -s <dossier_projet>/ckpts ckpts` (poids de Pixel Seal)
-6. Remplir `slurm/env.sh` et les lignes `#SBATCH` de `slurm/test.sh` et `slurm/vague.sh`,
-   puis `sbatch slurm/test.sh`
+## Le squelette, tâche par tâche
 
-Testé sans GPU : scores, tableau de bord, MMD (met/compare.py), chaîne SCRUB complète
-sur données factices (`--fake`). Non exécutés ici (ni GPU, ni accès aux poids) :
-pixelseal/quickstart.py, met/generate_vllm.py, met/generate_hf.py, slurm/*.sh.
-Les `run.sh` ont été vérifiés à blanc (enchaînement des commandes, gardes sur les
-variables), sans GPU.
+### 🖼️ Pixel Seal : tatouage d'images (GPU 2)
+
+L'objectif : cacher un message de 256 bits dans une image, puis le relire même après des attaques (JPEG, recadrage, flou…). Le compromis : un tatouage plus fort est plus robuste mais plus visible.
+
+| Fichier | Rôle |
+|---|---|
+| `pixelseal/quickstart.py` | La baseline. Tatoue N images, applique 6 attaques, relit le message, puis calcule le PSNR (qualité d'image), le taux de bits justes et la p-value. Le score est le taux moyen de bits justes sous attaque. À adapter à la métrique du jury. |
+| `pixelseal/run.sh` | Ce que la vague exécute sur le GPU 2 : `quickstart.py` avec trois forces de tatouage (`--scaling_w` 0,2, 0,3 et 0,4) en parallèle. |
+| `pixelseal/CLAUDE.md` | Le guide de la tâche : principe, API de videoseal, pièges et leviers d'amélioration. |
+
+Il a besoin de `IMAGES` (le dossier des images de test, connu à 12h) et du lien `ckpts` à la racine du dépôt.
+
+### 🔍 MET : audit d'API de modèles de langage (GPU 0)
+
+L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version modifiée (quantifiée, tatouée…). On utilise un test statistique à deux échantillons : la MMD avec un noyau de Hamming, et une p-value obtenue par permutation.
+
+| Fichier | Rôle |
+|---|---|
+| `met/mmd_test.py` | Le cœur statistique : le noyau de Hamming, la MMD sans biais calculée prompt par prompt, et le test de permutation `mmd_test(...)`. Testé : 5 % de faux positifs sous H0. |
+| `met/generate_vllm.py` | Génère les réponses de référence (P) avec vLLM, en fp32, fp16 ou bf16. Une graine différente est obligatoire pour chaque fichier. |
+| `met/generate_hf.py` | Génère les variantes à détecter (Q) avec transformers : `int8`, `nf4`, `watermark`, `fp16` ou `fp32`. |
+| `met/compare.py` | Compare deux échantillons (`.npz` de tokens ou `.json` de textes) et écrit la p-value comme score. Plus bas = différence détectée. |
+| `met/prompts_exemple.jsonl` | Le format des prompts : une ligne `{"id": "...", "text": "..."}` par prompt. |
+| `met/run.sh` | Ce que la vague exécute sur le GPU 0 : P et P' (contrôle), Q pour nf4, int8 et watermark, puis toutes les comparaisons. |
+| `met/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier et pièges (graines, gabarit de chat, décodage, mémoire). |
+
+Il a besoin de `MODEL_PATH` (le modèle téléchargé par `download_all.sh`). On lit le meilleur score avec `python -m common.scores --bas met`.
+
+### 🧹 SCRUB : désapprentissage (GPU 1)
+
+L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à un modèle déjà entraîné, sans tout réentraîner, et en gardant ses performances sur le reste. On utilise un schéma enseignant–élève : l'élève s'éloigne de l'enseignant sur le forget set et reste proche de lui sur le retain set.
+
+| Fichier | Rôle |
+|---|---|
+| `scrub/cifar.py` | La boîte à outils : ResNet-18 adapté à CIFAR, chargement des données (`--fake` pour tester sans données), découpage forget/retain, entraînement et évaluation. |
+| `scrub/scrub.py` | L'algorithme : SCRUB, SCRUB+R (rembobinage vers le point de sauvegarde le plus proche de la référence) et l'attaque d'appartenance (MIA). |
+| `scrub/train_original.py` | Entraîne le modèle original, ou le modèle réentraîné sans le forget set (`--retrain`), qui sert de référence. |
+| `scrub/run_scrub.py` | Applique SCRUB et SCRUB+R, mesure les erreurs (test, retain, forget) et la MIA, puis écrit le score : l'erreur sur le forget set. À adapter à la métrique du jury. |
+| `scrub/run.sh` | Ce que la vague exécute sur le GPU 1 : l'original et le réentraînement en parallèle, puis SCRUB en mode classe et en mode sélectif. |
+| `scrub/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier (tableau 3), pièges et leviers. |
+
+Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
+
+### 🧰 Commun aux trois tâches
+
+| Fichier | Rôle |
+|---|---|
+| `common/scores.py` | Le journal des scores. `log_score(tache, config, score, notes)` ajoute une ligne à `results/scores.csv`. `python -m common.scores` affiche le meilleur score de chaque tâche. **Un résultat absent du CSV n'existe pas pour l'équipe.** |
+| `common/dashboard.py` | Transforme `scores.csv` en une page HTML statique : `python -m common.dashboard` écrit `results/dashboard.html`. |
+| `common/smoke_test.py` | Le test de fumée GPU : GPU visibles, bf16, vitesse, imports, présence du modèle. Lancé par `slurm/test.sh`. |
+
+### ⚙️ Installation : `setup/` (nœud de login uniquement)
+
+| Fichier | Rôle |
+|---|---|
+| `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…). |
+| `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
+| `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
+
+### 🚀 Lancement sur les GPU : `slurm/`
+
+| Fichier | Rôle |
+|---|---|
+| `slurm/env.sh` | Les variables communes (`DIR`, `MODEL_PATH`, `IMAGES`, mode hors ligne `HF_HUB_OFFLINE=1`). **À remplir une fois.** |
+| `slurm/test.sh` | Un job de test de 10 minutes : `nvidia-smi` puis `smoke_test.py`. À lancer en premier. |
+| `slurm/vague.sh` | Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
+| `slurm/shell.sh` | Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Non testé. |
+
+### 📁 Sorties et documentation
+
+| Fichier ou dossier | Rôle |
+|---|---|
+| `results/` | `scores.csv` (versionné) et `dashboard.html`. Les grosses sorties (`results/met/`, `results/scrub/`) ne sont pas versionnées. |
+| `logs/` | Les sorties des jobs Slurm (non versionnées). |
+| `CLAUDE.md` | Le guide général pour les agents et les membres : règles absolues, cycle de travail, style. |
+| `docs/CLUSTER.md` | Les machines, la connexion SSH, Slurm, les règles du GPU partagé. |
+| `docs/STRATEGIE.md` | Le planning des 24 h, les principes de score, le fil conducteur du pitch. |
+| `docs/ETAT.md` | L'état courant du travail (meilleurs scores, ce qui tourne, à faire). **À lire en arrivant, à mettre à jour en partant.** |
+
+---
+
+## Ce qui a été testé
+
+- **Testé sans GPU :** les scores, le tableau de bord, la MMD (`met/compare.py`) et toute la chaîne SCRUB sur données factices (`--fake`).
+- **Vérifié à blanc :** l'enchaînement des `run.sh` et les gardes sur les variables.
+- **Jamais exécuté** (ni GPU ni poids disponibles pendant la préparation) : `pixelseal/quickstart.py`, `met/generate_vllm.py`, `met/generate_hf.py` et `slurm/*.sh`. Au premier échec, lis l'erreur avant de réécrire quoi que ce soit.
