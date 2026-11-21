@@ -39,6 +39,9 @@
 
 | # | Hypothèse | Configurations | mIoU (5 plis) | PS | TM | SS | Conclusion |
 |---|---|---|---|---|---|---|---|
+| H3a | Décoder la vraie boîte de la zone tatouée (images partielles) se détache du hasard | 1 (test) | — | médiane 0,55 | 0,95 | 0,61 | AUC vraie boîte / hasard ≈ 0,80 ; une boîte décalée de 25 % retombe au hasard : signal très précis en position. Viable. |
+| H4 | Le tatouage survit au miroir / aux rotations | 1 (test) | — | survit : miroir H, rot 90 | survit : miroir H | rien | **Rejetée** : augmentation miroir/rotation interdite (le U-Net `--aug` soumis la subissait). |
+| H3b | Recherche de rectangle par décodage (grille 48–512 px, puis raffinement) ; règle : image entière < t_full et meilleure boîte ≥ t_boîte → masque = boîte, sinon carte H1 ; 2 seuils par méthode réglés dans les plis | 1 | PS+TM : **0,5249 ± 0,0116** (carte H1 : 0,4682 ± 0,0066) | 0,5018 | 0,5480 | (en cours) | **Gardée** : gain +0,057 ± 0,012, 5/5 plis positifs. Gain venu des images partielles (TM 0,473 → 0,641, PS 0,498 → 0,559). |
 | H1 | Cartes par position (corrélation au message connu) : une carte seule + un seuil par méthode | 13 cartes évaluées | meilleures : PS `ps_512` 0,4715 ± 0,008 ; TM `tm_245` 0,4649 ± 0,007 ; SS `ss_16` 0,3634 ± 0,024 | AUC 0,89 (0,94 à 256 px) | AUC 0,91 | AUC 0,66 | Gardée (PS/TM). Fenêtres : PS 0,453, TM 0,281, SS 0,255. AUC élevée mais portée par les grandes zones. |
 
 ## Essais avant le protocole (plis non gelés, à ne pas comparer directement)
@@ -48,4 +51,4 @@
 - U-Net + synthétique v1 (supports pris aussi dans le test, trous = original remis) : 0,4691 → écarté.
 - Canal de détection PixelSeal (0,33), re-tatouage PixelSeal / TrustMark (~0,27) : rejetés.
 
-**Compteur de configurations essayées : ~30** (résolutions, tailles de bloc, 3 U-Net, synthétique v1, 13 cartes).
+**Compteur de configurations essayées : ~33** (résolutions, tailles de bloc, 3 U-Net, synthétique v1, 13 cartes).
