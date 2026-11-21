@@ -60,7 +60,7 @@ ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --e
 
 **Une fois.**
 
-- Le titulaire lance `bash setup/partage.sh <dossier_projet> <id1> <id2> ...` avec les identifiants JuDoor de tous les membres : il crée les files, ferme le dossier au groupe Unix du projet (commun à toutes les équipes) et l'ouvre aux seuls membres par ACL. Un membre ajouté plus tard : relancer la commande avec la liste complète.
+- Le titulaire lance `bash setup/partage.sh <dossier_projet> <id1> <id2> ...` avec les identifiants JuDoor de tous les membres : il crée les files, ferme le dossier au groupe Unix du projet (commun à toutes les équipes) et l'ouvre aux seuls membres par ACL. Un membre ajouté plus tard : chaque membre déjà présent lance `bash setup/ajouter_membre.sh <dossier_projet> <identifiant>` pour ses propres fichiers (Linux ne laisse changer les droits qu'au propriétaire).
 - Chaque membre ajoute `umask 002` à son `~/.bashrc` et clone le dépôt dans `$DIR/membres/<identifiant>/`.
 - Le titulaire lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il programme la relève dès le début avec `bash slurm/relancer.sh` (`sbatch --dependency=afterany`) : le job suivant démarre à la fin du précédent, jamais deux nœuds payés. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
 

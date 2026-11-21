@@ -149,6 +149,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
 | `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/`, ferme le dossier projet au groupe Unix (commun à toutes les équipes) et l'ouvre aux seuls membres listés par ACL (`setfacl`). Une fois, par le titulaire, avec les identifiants JuDoor de tous les membres. |
+| `setup/ajouter_membre.sh` | Ouvre le dossier à un membre arrivé après `partage.sh` : `bash setup/ajouter_membre.sh <dossier_projet> <identifiant>`. Chaque membre déjà présent la lance une fois, pour ses propres fichiers. |
 | `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : accès ACL, dossier fermé aux autres équipes, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
 
 ### Lancement sur les GPU : `slurm/` (les files d'attente)

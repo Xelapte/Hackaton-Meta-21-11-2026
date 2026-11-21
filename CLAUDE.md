@@ -48,7 +48,7 @@ slurm/noeud.sh             job du titulaire : garde le nœud, une file d'attente
 slurm/soumettre.sh         déposer une commande dans la file d'un GPU
 slurm/file.sh, annuler.sh  état des files ; arrêter la commande en cours
 slurm/vague.sh, shell.sh   secours (titulaire seulement)
-setup/partage.sh           crée les files, accès ACL de l'équipe (une fois)
+setup/partage.sh           crée les files, accès ACL de l'équipe (une fois) ; ajouter_membre.sh pour un retardataire
 pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = la baseline complète
 logs/                      sorties des jobs (non versionnées)
 ```
