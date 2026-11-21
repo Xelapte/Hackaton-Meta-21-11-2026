@@ -63,6 +63,18 @@
 - **Piste restante** : recherche fine des petits rectangles PS et SS (boîtes dès 32 px, pas d'un quart, raffinement serré),
   même règle à 2 seuils, sans paramètre nouveau ; gain estimé +0,01 à +0,03 ; plusieurs heures de GPU (run de nuit).
 
+## Autres pistes rejetées
+
+- **Doublons** entre images (miniatures 32 × 32, 1 530 images) : aucune paire > 0,95 de corrélation → pas d'astuce de données.
+- **Forensique haute fréquence** (énergie HF locale, normalisée par image ou par la texture) : AUC 0,49–0,68, mIoU 0,29 → rejetée.
+
+## Soumissions
+
+| n° | Méthode | Protocole (plis gelés) | Public |
+|---|---|---|---|
+| 1136 | U-Net + `--aug` (avant protocole) | 0,4705 (anciens plis) | 0,4804 |
+| 1412 | **H3b, rectangle + repli carte** | **0,5065 ± 0,0092** | **0,5042** |
+
 ## Essais avant le protocole (plis non gelés, à ne pas comparer directement)
 
 - Mode direct (17h20) : 0,4339 (seuils et résolution réglés sur tout le train : optimiste).
