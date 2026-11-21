@@ -43,8 +43,8 @@ hf auth login                                       # accès Llama ou Mistral ac
 bash setup/download_all.sh <dossier_projet> <modele_hf>
 bash setup/install_pixelseal.sh <dossier_projet>
 ln -s <dossier_projet>/ckpts ckpts                  # à la racine du dépôt
-bash setup/partage.sh <dossier_projet>              # files d'attente et droits du groupe
-# puis remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/noeud.sh
+bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # files d'attente, accès réservé à l'équipe (ACL)
+# puis remplir DIR dans slurm/env.sh (#SBATCH déjà rempli : training2666, dc-gpu, cispahack)
 sbatch slurm/test.sh                                # titulaire : test de fumée (logs/test-<id>.out)
 sbatch slurm/noeud.sh                               # titulaire : garde le nœud, ouvre les files
 ```
@@ -60,7 +60,7 @@ ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --e
 
 **Une fois.**
 
-- Le titulaire lance `bash setup/partage.sh <dossier_projet>`, qui crée les files et ouvre le dossier au groupe du projet.
+- Le titulaire lance `bash setup/partage.sh <dossier_projet> <id1> <id2> ...` avec les identifiants JuDoor de tous les membres : il crée les files, ferme le dossier au groupe Unix du projet (commun à toutes les équipes) et l'ouvre aux seuls membres par ACL. Un membre ajouté plus tard : relancer la commande avec la liste complète.
 - Chaque membre ajoute `umask 002` à son `~/.bashrc` et clone le dépôt dans `$DIR/membres/<identifiant>/`.
 - Le titulaire lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il programme la relève dès le début avec `bash slurm/relancer.sh` (`sbatch --dependency=afterany`) : le job suivant démarre à la fin du précédent, jamais deux nœuds payés. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
 
@@ -88,7 +88,7 @@ Les files ont été testées sans GPU : dépôt, ordre, annulation, arrêt, repr
 - `sbatch slurm/vague.sh`, lancé par le titulaire, exécute le `run.sh` de chaque tâche ;
 - `slurm/shell.sh`, pour le titulaire seulement, ouvre un terminal dans son propre job.
 
-Les partitions : `develbooster` pour les tests courts, `booster` pour les longs. Ce sont les noms sur JUWELS Booster : adapte-les aux consignes des organisateurs.
+La machine est JURECA-DC : compte `training2666`, partition `dc-gpu`, réservation `cispahack` (jusqu'au 22/11 14h). Ces valeurs sont déjà dans les lignes `#SBATCH`.
 
 ## Les règles du GPU partagé
 

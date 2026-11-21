@@ -6,13 +6,13 @@
 # Pour la relève (sans payer deux nœuds) : bash slurm/relancer.sh
 # Arrêt propre (après les commandes en cours) : touch <dossier_projet>/queue/STOP
 #SBATCH --job-name=noeud
-#SBATCH --account=<projet>
-#SBATCH --partition=booster
+#SBATCH --account=training2666
+#SBATCH --partition=dc-gpu
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --time=06:00:00
 #SBATCH --output=logs/noeud-%j.out
-##SBATCH --reservation=<nom>        # si les organisateurs en fournissent une
+#SBATCH --reservation=cispahack      # réservation du hackathon (jusqu'au 22/11 14h)
 
 source slurm/env.sh || exit 1
 [ -d "$DIR/queue/gpu0/attente" ] || { echo "Lancez d'abord setup/partage.sh"; exit 1; }

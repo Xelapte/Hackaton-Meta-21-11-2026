@@ -55,8 +55,8 @@ source <dossier_projet>/env/bin/activate            # 2. l'activer
 hf auth login                                       #    si le modèle demande un accès (Llama, Mistral)
 bash setup/download_all.sh <dossier_projet> <modele_hf>   # 3. dépôts, poids, CIFAR, modèle
 bash setup/install_pixelseal.sh <dossier_projet>    # 4. bibliothèque videoseal
-bash setup/partage.sh <dossier_projet>              # 5. files d'attente et droits du groupe
-# 6. remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/noeud.sh
+bash setup/partage.sh <dossier_projet> <id1> <id2> ...   # 5. files d'attente, accès réservé à l'équipe (ACL)
+# 6. remplir DIR dans slurm/env.sh (les lignes #SBATCH sont déjà remplies)
 sbatch slurm/test.sh                                # 7. test de fumée : lire logs/test-<id>.out
 sbatch slurm/noeud.sh                               # 8. garde le nœud, ouvre les 4 files
 bash slurm/relancer.sh                              # 9. programme la relève (à refaire à chaque nouveau job)
@@ -148,8 +148,8 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `setup/install_env.sh` | Crée l'environnement Python de l'équipe dans `$DIR/env` (vLLM, torch, transformers…). |
 | `setup/download_all.sh` | Télécharge les trois dépôts officiels, les poids de Pixel Seal, CIFAR-10 et CIFAR-100, et le modèle de langage. |
 | `setup/install_pixelseal.sh` | Installe la bibliothèque videoseal, qui contient Pixel Seal, dans l'environnement. À lancer après `download_all.sh`. |
-| `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/` et ouvre le dossier projet au groupe de l'équipe. Une fois, par le titulaire. |
-| `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : groupe, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
+| `setup/partage.sh` | Crée les files d'attente des 4 GPU dans `$DIR/queue/`, ferme le dossier projet au groupe Unix (commun à toutes les équipes) et l'ouvre aux seuls membres listés par ACL (`setfacl`). Une fois, par le titulaire, avec les identifiants JuDoor de tous les membres. |
+| `setup/verif_partage.sh` | Chaque membre vérifie qu'il peut travailler dans le dossier partagé : accès ACL, dossier fermé aux autres équipes, écriture dans les 4 files et dans le journal des scores, `umask 002`, clones lisibles. Affiche « PARTAGE OK » ou ce qui manque. Indique aussi le nœud de login utilisé (les sessions `tmux` restent sur ce nœud). |
 
 ### Lancement sur les GPU : `slurm/` (les files d'attente)
 

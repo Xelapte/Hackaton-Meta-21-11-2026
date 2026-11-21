@@ -39,8 +39,8 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 
 ## À faire
 
-- [ ] Remplir `slurm/env.sh` et les lignes `#SBATCH`, puis faire passer `slurm/test.sh`.
-- [ ] `setup/partage.sh`, un clone par membre dans `$DIR/membres/`, `umask 002` pour tous.
+- [ ] Remplir `DIR` dans `slurm/env.sh`, puis faire passer `slurm/test.sh`.
+- [ ] `setup/partage.sh <dossier_projet> <identifiants...>`, un clone par membre dans `$DIR/membres/`, `umask 002` pour tous.
 - [ ] `sbatch slurm/noeud.sh` : `bash slurm/file.sh` montre 4 files actives.
 - [ ] Baseline Pixel Seal adaptée à la métrique des tests.
 - [ ] Baseline MET adaptée à la métrique des tests.

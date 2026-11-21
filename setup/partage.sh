@@ -1,17 +1,28 @@
 #!/bin/bash
-# Prépare le dossier projet pour une équipe de plusieurs comptes. À lancer UNE fois,
-# par le titulaire du nœud, sur le NŒUD DE LOGIN :
-#   bash setup/partage.sh <dossier_projet>
-# Crée les files d'attente des GPU et rend tout le dossier modifiable par le groupe
-# du projet. Chaque membre doit aussi ajouter « umask 002 » à son ~/.bashrc.
+# Prépare le dossier de l'équipe. À lancer UNE fois, par le titulaire du nœud, sur le
+# nœud de login, avec les identifiants JuDoor de TOUS les membres de l'équipe :
+#   bash setup/partage.sh <dossier_projet> <identifiant1> <identifiant2> ...
+# Le groupe Unix du projet (ex. training2666) est commun à TOUTES les équipes : on ne
+# s'en sert pas. Le dossier est fermé au groupe et ouvert aux seuls membres listés,
+# par ACL (setfacl), y compris pour les fichiers créés plus tard (ACL par défaut).
 set -euo pipefail
-DIR=${1:?"usage : bash setup/partage.sh <dossier_projet>"}
+DIR=${1:?"usage : bash setup/partage.sh <dossier_projet> <identifiant> [<identifiant>...]"}
+shift
+[ $# -gt 0 ] || { echo "Donnez les identifiants JuDoor des membres de l'équipe"; exit 1; }
+MOI=$(id -un)
 for g in 0 1 2 3; do
     mkdir -p "$DIR/queue/gpu$g/attente" "$DIR/queue/gpu$g/en_cours" "$DIR/queue/gpu$g/fini"
 done
 mkdir -p "$DIR/queue/logs" "$DIR/membres"
-chmod -R g+rwX "$DIR"
-find "$DIR" -type d -exec chmod g+s {} +      # les nouveaux fichiers gardent le groupe
-echo "Groupe du dossier : $(stat -c %G "$DIR")  (doit être le groupe du projet)"
-echo "Chaque membre : echo 'umask 002' >> ~/.bashrc, puis clone le dépôt dans"
-echo "  $DIR/membres/\$USER/"
+chmod -R go-rwx "$DIR"                       # fermé aux autres équipes et au reste du monde
+for u in "$MOI" "$@"; do
+    id "$u" >/dev/null 2>&1 || { echo "Identifiant inconnu : $u"; exit 1; }
+    setfacl -R -m "u:$u:rwX" "$DIR"          # accès aux fichiers existants
+    setfacl -R -d -m "u:$u:rwX" "$DIR"       # et à tous ceux créés ensuite
+done
+# Le dossier parent doit être traversable par les membres (cas d'un sous-dossier).
+P=$(dirname "$DIR")
+for u in "$@"; do setfacl -m "u:$u:x" "$P" 2>/dev/null || true; done
+echo "Dossier de l'équipe : $DIR"
+getfacl -p "$DIR" | grep -E "^(user|group|other|mask)"
+echo "Chaque membre : bash setup/verif_partage.sh (doit finir par PARTAGE OK)"

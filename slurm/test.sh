@@ -1,15 +1,14 @@
 #!/bin/bash
 # Test de fumée sur un nœud GPU (10 minutes). À lancer depuis la racine du dépôt :
 #   sbatch slurm/test.sh
-# Remplissez d'abord slurm/env.sh et les valeurs entre chevrons ci-dessous. La partition
-# develbooster est celle de test sur JUWELS Booster : adaptez-la aux consignes.
-#SBATCH --account=<projet>
-#SBATCH --partition=develbooster
+# Remplissez d'abord slurm/env.sh. JURECA-DC : partition dc-gpu, réservation cispahack.
+#SBATCH --account=training2666
+#SBATCH --partition=dc-gpu
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --time=00:10:00
 #SBATCH --output=logs/test-%j.out
-##SBATCH --reservation=<nom>        # si les organisateurs en fournissent une
+#SBATCH --reservation=cispahack      # réservation du hackathon (jusqu'au 22/11 14h)
 
 source slurm/env.sh || exit 1
 nvidia-smi

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Variables communes aux jobs (test.sh, noeud.sh, vague.sh) et à chaque commande des files.
 # À remplir une fois, puis depuis la racine du dépôt :  source slurm/env.sh
-export DIR="<dossier_projet>"                     # à remplacer
+export DIR="<dossier_projet>"                     # ex. /p/project1/training2666/<nom_equipe>
 case "$DIR" in "<"*) echo "Remplacez <dossier_projet> dans slurm/env.sh"
                      return 1 2>/dev/null || exit 1;; esac
 source "$DIR/env/bin/activate"

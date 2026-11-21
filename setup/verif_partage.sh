@@ -5,8 +5,13 @@ source slurm/env.sh >/dev/null || exit 1
 ok=1
 echo "Vous : $(id -un) | groupes : $(id -Gn)"
 echo "Nœud de login : $(hostname)   (notez-le : vos sessions tmux restent sur ce nœud)"
-G=$(stat -c %G "$DIR"); echo "Groupe du dossier projet : $G"
-id -Gn | tr ' ' '\n' | grep -qx "$G" || { echo "ÉCHEC : vous n'êtes pas dans le groupe $G"; ok=0; }
+if [ "$(stat -c %U "$DIR")" != "$(id -un)" ] && ! getfacl -p "$DIR" 2>/dev/null | grep -q "^user:$(id -un):rw"; then
+    echo "ÉCHEC : le dossier de l'équipe ne vous est pas ouvert (setup/partage.sh avec votre identifiant)"; ok=0
+fi
+case "$(stat -c %A "$DIR")" in
+    ???????---) ;;
+    *) echo "ATTENTION : le dossier est lisible par d'autres que l'équipe : relancez setup/partage.sh"; ok=0;;
+esac
 for g in 0 1 2 3; do
     f="$DIR/queue/gpu$g/attente/.verif_$(id -un)"
     if touch "$f" 2>/dev/null; then rm -f "$f"; else echo "ÉCHEC : écriture impossible dans la file du GPU $g"; ok=0; fi
