@@ -14,7 +14,7 @@ Le hackathon (European AI Championship, Paris) va du samedi 21/11 à 14h30 au di
 
 | Tâche | Ce qu'on rend | Score | Code du kit | Où ça tourne |
 |---|---|---|---|---|
-| 1. Localiser le tatouage (PixelSeal, TrustMark, StegaStamp) | une carte 128×128 par image | mIoU | — (à écrire, voir doc) | file GPU 2 |
+| 1. Localiser le tatouage (PixelSeal, TrustMark, StegaStamp) | une carte 128×128 par image | mIoU | `watermark/baseline.py` | file GPU 2 |
 | 2. Model Equality : 33 endpoints d'API | CSV `endpoint,family,model` | 0,1 MCC famille + 0,9 MCC modèle | `met/analyse.py` | **nœud de login** (API, CPU) |
 | 3. Unlearning : ViT-B/16, 3 500 images à oublier | `state_dict` (.pt) | forget × retain, 0 si précision < 70 % | `unlearning/unlearn.py` | file GPU 1 |
 
@@ -52,6 +52,7 @@ slurm/vague.sh, shell.sh   secours (titulaire seulement)
 setup/partage.sh           crée les files, accès ACL de l'équipe (une fois) ; ajouter_membre.sh pour un retardataire
 setup/fermer.sh            ferme le dossier OFFICIEL aux autres équipes (ACL)
 pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = la baseline complète
+watermark/baseline.py      tâche 1 réelle (fenêtres décodées, U-Net)
 met/analyse.py             tâche 2 réelle (API, nœud de login)
 unlearning/unlearn.py      tâche 3 réelle (baseline ViT)
 logs/                      sorties des jobs (non versionnées)
