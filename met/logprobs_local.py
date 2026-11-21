@@ -27,6 +27,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--answers", nargs="+", required=True)
     ap.add_argument("--prefix", default="ref-")
+    ap.add_argument("--batterie", default=None, help="CSV des prompts si les réponses n'ont pas de champ prompt")
     ap.add_argument("--modele", default="HuggingFaceTB/SmolLM2-360M-Instruct")
     ap.add_argument("--models_dir", default=os.path.join(os.environ.get("DIR", "."), "models", "met_local"))
     ap.add_argument("--fp8", action="store_true", help="simuler la version fp8 du modèle local")
@@ -42,7 +43,7 @@ def main():
 
     torch.manual_seed(args.seed)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    items = lire_reponses(args.answers, args.prefix)
+    items = lire_reponses(args.answers, args.prefix, args.batterie)
     d = dossier_modele(args.models_dir, args.modele)
     tok = AutoTokenizer.from_pretrained(d)
     model = AutoModelForCausalLM.from_pretrained(d, dtype=torch.bfloat16).to(dev).eval()

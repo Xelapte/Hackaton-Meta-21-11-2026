@@ -60,7 +60,12 @@ def telecharger(args):
 
 
 # ----------------------------------------------------------------------------- données
-def lire_reponses(chemins, prefixe):
+def lire_reponses(chemins, prefixe, batterie=None):
+    """Réponses d'endpoints. batterie : CSV id,...,prompt (pour les fichiers sans champ prompt, ex. sonde_ref.jsonl)."""
+    prompts = {}
+    if batterie:
+        with open(batterie, newline="", encoding="utf-8") as fh:
+            prompts = {r["id"]: r["prompt"] for r in csv.DictReader(fh)}
     items = []
     for ch in chemins:
         with open(ch, encoding="utf-8") as fh:
@@ -68,6 +73,9 @@ def lire_reponses(chemins, prefixe):
                 if ligne.strip():
                     r = json.loads(ligne)
                     if str(r["endpoint"]).startswith(prefixe) and (r.get("response") or "").strip():
+                        r.setdefault("repeat", r.get("tirage", 0))
+                        if "prompt" not in r:
+                            r["prompt"] = prompts[r["id"]]
                         items.append(r)
     return items
 
@@ -143,6 +151,7 @@ def main():
     ap.add_argument("--models_dir", default=os.path.join(os.environ.get("DIR", "."), "models", "met_local"))
     ap.add_argument("--answers", nargs="+", help="fichiers .jsonl de réponses")
     ap.add_argument("--prefix", default="ref-")
+    ap.add_argument("--batterie", default=None, help="CSV des prompts si les réponses n'ont pas de champ prompt")
     ap.add_argument("--key", default=None, help="practice_answers.csv (pour les ref-)")
     ap.add_argument("--seuil_z", type=float, default=2.0, help="|z| du LLR au-delà duquel on tranche")
     ap.add_argument("--out", default="results/score_local.csv")
@@ -157,7 +166,7 @@ def main():
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    items = lire_reponses(args.answers, args.prefix)
+    items = lire_reponses(args.answers, args.prefix, args.batterie)
     cle = lire_cle(args.key)
     eps = sorted({it["endpoint"] for it in items})
     print(f"{len(items)} réponses, {len(eps)} endpoints, appareil {dev}")

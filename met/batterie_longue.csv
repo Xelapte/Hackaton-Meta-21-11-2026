@@ -1,0 +1,31 @@
+id,type,max_tokens,prompt
+desc_1,description,220,Write a paragraph of about 150 words describing a walk along a beach at sunrise.
+desc_2,description,220,Write a paragraph of about 150 words describing a busy market in a small town on a Saturday morning.
+desc_3,description,220,Write a paragraph of about 150 words describing a quiet library on a rainy afternoon.
+desc_4,description,220,Write a paragraph of about 150 words describing a mountain village in winter.
+desc_5,description,220,Write a paragraph of about 150 words describing an old train station at night.
+desc_6,description,220,Write a paragraph of about 150 words describing a garden in late spring.
+expl_1,explication,220,Explain in about 150 words how photosynthesis works.
+expl_2,explication,220,Explain in about 150 words why the sky is blue.
+expl_3,explication,220,Explain in about 150 words how a refrigerator keeps food cold.
+expl_4,explication,220,Explain in about 150 words what causes the seasons on Earth.
+expl_5,explication,220,Explain in about 150 words how vaccines help the immune system.
+expl_6,explication,220,Explain in about 150 words how a bicycle stays upright while moving.
+hist_1,histoire,220,Write a short story of about 150 words about a child who finds a lost dog.
+hist_2,histoire,220,Write a short story of about 150 words about a baker who opens a new shop.
+hist_3,histoire,220,Write a short story of about 150 words about two friends who get lost while hiking.
+hist_4,histoire,220,Write a short story of about 150 words about an old fisherman and a storm.
+hist_5,histoire,220,Write a short story of about 150 words about a robot that learns to paint.
+code_1,code,220,Write a Python function that checks whether a string is a palindrome. Add a short docstring and two examples.
+code_2,code,220,Write a Python function that returns the n-th Fibonacci number using a loop. Add a short docstring and two examples.
+code_3,code,220,Write a Python function that counts how many times each word appears in a text. Add a short docstring and an example.
+code_4,code,220,Write a Python function that merges two sorted lists into one sorted list. Add a short docstring and an example.
+inst_1,instructions,220,Give step-by-step instructions for making a cup of tea.
+inst_2,instructions,220,Give step-by-step instructions for planting a tree.
+inst_3,instructions,220,Give step-by-step instructions for changing a flat bicycle tire.
+inst_4,instructions,220,Give step-by-step instructions for cooking a simple omelette.
+liste_1,liste,220,List ten common fruits and give one sentence about each.
+liste_2,liste,220,List eight tips for studying effectively and explain each in one sentence.
+liste_3,liste,220,List eight animals that live in the ocean and give one fact about each.
+resume_1,resume,220,"Summarize in about 150 words the main events of the story of Little Red Riding Hood."
+resume_2,resume,220,"Summarize in about 150 words the history of the bicycle, from its invention to today."
