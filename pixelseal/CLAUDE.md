@@ -15,7 +15,7 @@ Le papier : *Pixel Seal*, arXiv 2512.16874. Code officiel : github.com/facebookr
 | Fichier | Rôle |
 |---|---|
 | `pixelseal/quickstart.py` | Tatoue N images, applique 6 attaques, relit le message. Calcule le PSNR, le taux de bits justes et −log10 p. Score = taux moyen de bits justes sur les attaques. |
-| `pixelseal/run.sh` | Lancé par la vague : trois valeurs de `--scaling_w` (0,2, 0,3, 0,4) en parallèle sur le même GPU. |
+| `pixelseal/run.sh` | Déposé dans la file du GPU 2 (`bash slurm/soumettre.sh 2 base bash pixelseal/run.sh`) : trois valeurs de `--scaling_w` (0,2, 0,3, 0,4) en parallèle sur le même GPU. |
 
 L'API de videoseal :
 

@@ -1,6 +1,6 @@
 #!/bin/bash
-# Baseline Pixel Seal (fiche 6). Lancé par slurm/vague.sh sur le GPU 2,
-# ou à la main dans un terminal limité à un GPU (slurm/shell.sh).
+# Baseline Pixel Seal (fiche 6). Déposé dans la file du GPU 2 :
+#   bash slurm/soumettre.sh 2 base bash pixelseal/run.sh   (secours : slurm/vague.sh)
 # Variable attendue : IMAGES (dossier d'images de test).
 # Le script se place à la racine du dépôt, là où se trouve le lien ckpts.
 set -euo pipefail

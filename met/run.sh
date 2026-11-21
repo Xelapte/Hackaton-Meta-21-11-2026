@@ -1,6 +1,6 @@
 #!/bin/bash
-# Baseline Model Equality Testing (fiche 7). Lancé par slurm/vague.sh sur le GPU 0,
-# ou à la main dans un terminal limité à un GPU (slurm/shell.sh).
+# Baseline Model Equality Testing (fiche 7). Déposé dans la file du GPU 0 :
+#   bash slurm/soumettre.sh 0 base bash met/run.sh   (secours : slurm/vague.sh)
 # Variables attendues : MODEL_PATH (dossier du modèle), et facultatif PROMPTS, OUT.
 # Pour une deuxième instance (GPU joker), copiez ce fichier et changez OUT.
 set -euo pipefail

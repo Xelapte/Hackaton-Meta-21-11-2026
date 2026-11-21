@@ -18,15 +18,15 @@ Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le
 
 | Où | Ce qu'on y fait |
 |---|---|
-| **Ordinateur perso** | Uniquement `ssh jsc` pour se connecter. On peut aussi y éditer le code puis faire `git push`, rien de plus. |
-| **Nœud de login** (`ssh jsc`) | **Tout le reste** : ton clone du dépôt (dans `$DIR/membres/<identifiant>/`), `git pull`, installations, téléchargements (`pip`, `wget`, `hf download`, jeux de données), et le dépôt de tes commandes dans les files des GPU (`slurm/soumettre.sh`). |
+| **Ordinateur perso** | **Terminal SSH seulement** : `ssh jsc`, rien d'autre. On n'y édite même pas le code. |
+| **Nœud de login** (`ssh jsc`) | **Tout le reste** : ton clone du dépôt (dans `$DIR/membres/<identifiant>/`), où tu modifies, testes et pousses le code (`git pull`, `git push`), installations, téléchargements (`pip`, `wget`, `hf download`, jeux de données), et le dépôt de tes commandes dans les files des GPU (`slurm/soumettre.sh`). |
 | **Nœuds GPU** | L'exécution des commandes des files, dans le job du titulaire. On ne s'y connecte pas. **Ils n'ont pas internet** : un téléchargement y fait planter le script. |
 
 Ne lance pas non plus de calcul lourd directement sur le nœud de login : il est partagé avec tout le centre. Tout ce qui utilise un GPU passe par les files d'attente (`slurm/soumettre.sh`).
 
 ### Qui lance les jobs : le titulaire du nœud
 
-- **Un seul membre, le titulaire du nœud**, porte le job sur son compte : `sbatch slurm/noeud.sh`. Ce job garde le nœud (4 GPU) et ouvre **une file d'attente par GPU**. Son seul rôle régulier : relancer ce job avant la fin de son `--time`. Il est le seul à lancer des jobs Slurm : un deuxième job consommerait un deuxième nœud et doublerait le budget.
+- **Un seul membre, le titulaire du nœud**, porte le job sur son compte : `sbatch slurm/noeud.sh`. Ce job garde le nœud (4 GPU) et ouvre **une file d'attente par GPU**. Son seul rôle régulier : programmer la relève dès le début avec `bash slurm/relancer.sh`. Le job suivant démarre automatiquement à la fin du précédent, donc jamais deux nœuds payés en même temps. Il est le seul à lancer des jobs Slurm : un deuxième job consommerait un deuxième nœud et doublerait le budget.
 - **Chaque membre a son propre compte et sa propre clé SSH.** Slurm ne laisse entrer dans un job que la personne qui l'a lancé : les autres ne se connectent donc jamais au nœud GPU. Ils **déposent leurs commandes** dans la file de leur GPU depuis le nœud de login, et la file les exécute une par une.
 - **Le relais de nuit**, à tour de rôle, prend le relais quand le titulaire dort : si le job s'arrête, il relance `slurm/noeud.sh` sous son propre compte. Les commandes en attente ne sont pas perdues.
 - **Les petits tests sont libres** : une commande de moins de 30 minutes, dans la file du GPU de sa tâche, dont on suit le journal.
@@ -59,6 +59,7 @@ bash setup/partage.sh <dossier_projet>              # 5. files d'attente et droi
 # 6. remplir slurm/env.sh et les lignes #SBATCH de slurm/test.sh et slurm/noeud.sh
 sbatch slurm/test.sh                                # 7. test de fumée : lire logs/test-<id>.out
 sbatch slurm/noeud.sh                               # 8. garde le nœud, ouvre les 4 files
+bash slurm/relancer.sh                              # 9. programme la relève (à refaire à chaque nouveau job)
 ```
 
 **Chaque membre, une fois**, sur le nœud de login :
@@ -77,7 +78,7 @@ bash setup/verif_partage.sh                         # doit afficher « PARTAGE O
 ```bash
 bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : bash slurm/soumettre.sh 1 scrub_base bash scrub/run.sh
 bash slurm/file.sh                                        # état des 4 files
-tail -f $DIR/queue/logs/<nom>.log                          # suivre le run
+tail -f $DIR/queue/logs/<nom affiché>.log                  # suivre le run (chemin affiché par soumettre.sh)
 bash slurm/annuler.sh <gpu>                               # arrêter TA commande en cours (jamais celle d'un autre)
 source slurm/env.sh && python -m common.scores            # meilleurs scores de l'équipe
 ```
@@ -96,7 +97,7 @@ L'objectif : cacher un message de 256 bits dans une image, puis le relire même 
 |---|---|
 | `pixelseal/smoke_test.py` | Le test de fumée de la tâche : vérifie que les poids sont lus dans `ckpts/` sans téléchargement, et que le message est relu sur une image non attaquée. `bash slurm/soumettre.sh 2 smoke python pixelseal/smoke_test.py`. |
 | `pixelseal/quickstart.py` | La baseline. Tatoue N images, applique 6 attaques, relit le message, puis calcule le PSNR (qualité d'image), le taux de bits justes et la p-value. Le score est le taux moyen de bits justes sous attaque. À adapter à la métrique du jury. |
-| `pixelseal/run.sh` | La baseline complète, à déposer dans la file du GPU 2 : `quickstart.py` avec trois forces de tatouage (`--scaling_w` 0,2, 0,3 et 0,4) en parallèle. |
+| `pixelseal/run.sh` | La baseline complète, à déposer dans la file du GPU 2 (`bash slurm/soumettre.sh 2 base bash pixelseal/run.sh`) : `quickstart.py` avec trois forces de tatouage (`--scaling_w` 0,2, 0,3 et 0,4) en parallèle. |
 | `pixelseal/CLAUDE.md` | Le guide de la tâche : principe, API de videoseal, pièges et leviers d'amélioration. |
 
 Il a besoin de `IMAGES` (le dossier des images de test, connu à 12h) et du lien `ckpts` à la racine du dépôt.
@@ -112,7 +113,7 @@ L'objectif : savoir si une API sert vraiment le modèle annoncé, ou une version
 | `met/generate_hf.py` | Génère les variantes à détecter (Q) avec transformers : `int8`, `nf4`, `watermark`, `fp16` ou `fp32`. |
 | `met/compare.py` | Compare deux échantillons (`.npz` de tokens ou `.json` de textes) et écrit la p-value comme score. Plus bas = différence détectée. |
 | `met/prompts_exemple.jsonl` | Le format des prompts : une ligne `{"id": "...", "text": "..."}` par prompt. |
-| `met/run.sh` | La baseline complète, à déposer dans la file du GPU 0 : P et P' (contrôle), Q pour nf4, int8 et watermark, puis toutes les comparaisons. |
+| `met/run.sh` | La baseline complète, à déposer dans la file du GPU 0 (`bash slurm/soumettre.sh 0 base bash met/run.sh`) : P et P' (contrôle), Q pour nf4, int8 et watermark, puis toutes les comparaisons. |
 | `met/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier et pièges (graines, gabarit de chat, décodage, mémoire). |
 
 Il a besoin de `MODEL_PATH` (le modèle téléchargé par `download_all.sh`). On lit le meilleur score avec `python -m common.scores --bas met`.
@@ -127,7 +128,7 @@ L'objectif : faire **oublier** un sous-ensemble de données (le forget set) à u
 | `scrub/scrub.py` | L'algorithme : SCRUB, SCRUB+R (rembobinage vers le point de sauvegarde le plus proche de la référence) et l'attaque d'appartenance (MIA). |
 | `scrub/train_original.py` | Entraîne le modèle original, ou le modèle réentraîné sans le forget set (`--retrain`), qui sert de référence. |
 | `scrub/run_scrub.py` | Applique SCRUB et SCRUB+R, mesure les erreurs (test, retain, forget) et la MIA, puis écrit le score : l'erreur sur le forget set. À adapter à la métrique du jury. |
-| `scrub/run.sh` | La baseline complète, à déposer dans la file du GPU 1 : l'original et le réentraînement en parallèle, puis SCRUB en mode classe et en mode sélectif. |
+| `scrub/run.sh` | La baseline complète, à déposer dans la file du GPU 1 (`bash slurm/soumettre.sh 1 base bash scrub/run.sh`) : l'original et le réentraînement en parallèle, puis SCRUB en mode classe et en mode sélectif. |
 | `scrub/CLAUDE.md` | Le guide de la tâche : principe, réglages du papier (tableau 3), pièges et leviers. |
 
 Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
@@ -137,7 +138,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | Fichier | Rôle |
 |---|---|
 | `common/scores.py` | Le journal des scores. `log_score(tache, config, score, notes)` ajoute une ligne au journal partagé `$DIR/scores.csv` (variable `SCORES_CSV`, fixée dans `slurm/env.sh`). `source slurm/env.sh && python -m common.scores` affiche le meilleur score de chaque tâche. **Un résultat absent du CSV n'existe pas pour l'équipe.** |
-| `common/dashboard.py` | Transforme le journal des scores en une page HTML statique : `python -m common.dashboard` écrit `results/dashboard.html`. |
+| `common/dashboard.py` | Transforme le journal des scores en une page HTML statique : `python -m common.dashboard` écrit `$DIR/dashboard.html`, à côté du journal partagé. |
 | `common/smoke_test.py` | Le test de fumée GPU : GPU visibles, bf16, vitesse, imports, présence du modèle. Lancé par `slurm/test.sh`. |
 
 ### Installation : `setup/` (nœud de login uniquement)
@@ -160,6 +161,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 | `slurm/worker.sh` | Exécute une par une, dans l'ordre de dépôt, les commandes de la file d'un GPU (`attente/` → `en_cours/` → `fini/`). Lancé par `noeud.sh`, jamais à la main. |
 | `slurm/soumettre.sh` | **Ce que chaque membre utilise** : dépose une commande dans la file d'un GPU, depuis son clone. Elle s'exécute avec `slurm/env.sh` chargé et `CUDA_VISIBLE_DEVICES` fixé. |
 | `slurm/file.sh` | Affiche l'état des 4 files : active ou non, commande en cours, en attente, dernières finies. |
+| `slurm/relancer.sh` | **Titulaire (ou relais de nuit)** : programme la relève du job du nœud. Un nouveau `noeud.sh` démarre dès que l'actuel se termine (`sbatch --dependency=afterany`) : jamais deux nœuds payés, et les commandes en attente passent au job suivant. |
 | `slurm/annuler.sh` | Arrête la commande en cours sur un GPU (la file passe à la suivante). Pour retirer une commande en attente : `rm $DIR/queue/gpuN/attente/<nom>.sh`. |
 | `slurm/vague.sh` | **Secours**, si les files ne marchent pas. Une « vague » : un processus par GPU en parallèle (GPU 0 : `met/run.sh`, GPU 1 : `scrub/run.sh`, GPU 2 : `pixelseal/run.sh`, GPU 3 : le joker si `JOKER` est rempli). |
 | `slurm/shell.sh` | **Secours, pour le titulaire seulement.** Un terminal interactif dans la réservation, limité à un seul GPU : `bash slurm/shell.sh <jobid> <gpu>`. Pratique pour déboguer. Le `<jobid>` est celui de la réservation du titulaire. Non testé. |
@@ -168,7 +170,7 @@ Il a besoin de `DIR` (CIFAR doit déjà être dans `$DIR/data`).
 
 | Fichier ou dossier | Rôle |
 |---|---|
-| `results/` | Sorties locales du clone, dont `dashboard.html`. Le journal des scores n'y est plus : il est partagé dans `$DIR/scores.csv`. Les grosses sorties (`results/met/`, `results/scrub/`) ne sont pas versionnées. |
+| `results/` | Sorties locales du clone. Le journal des scores n'y est plus : il est partagé dans `$DIR/scores.csv`. Les grosses sorties (`results/met/`, `results/scrub/`) ne sont pas versionnées. |
 | `logs/` | Les sorties des jobs Slurm (non versionnées). |
 | `CLAUDE.md` | Le guide général pour les agents et les membres : règles absolues, cycle de travail, style. |
 | `docs/CLUSTER.md` | Les machines, la connexion SSH, Slurm, les règles du GPU partagé. |

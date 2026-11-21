@@ -1,6 +1,6 @@
 #!/bin/bash
-# Baseline SCRUB (fiche 8). Lancé par slurm/vague.sh sur le GPU 1,
-# ou à la main dans un terminal limité à un GPU (slurm/shell.sh).
+# Baseline SCRUB (fiche 8). Déposé dans la file du GPU 1 :
+#   bash slurm/soumettre.sh 1 base bash scrub/run.sh   (secours : slurm/vague.sh)
 # Variables attendues : DIR (dossier projet, qui contient data/), facultatif OUT.
 # Le modèle original et le réentraînement tournent en parallèle sur le même GPU :
 # un ResNet-18 CIFAR n'utilise qu'une petite partie des 40 Go.

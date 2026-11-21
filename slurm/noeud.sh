@@ -3,7 +3,9 @@
 # une par GPU. Chaque membre y dépose ses commandes avec slurm/soumettre.sh, depuis
 # son propre compte. Depuis la racine du clone du titulaire :
 #   sbatch slurm/noeud.sh
+# Pour la relève (sans payer deux nœuds) : bash slurm/relancer.sh
 # Arrêt propre (après les commandes en cours) : touch <dossier_projet>/queue/STOP
+#SBATCH --job-name=noeud
 #SBATCH --account=<projet>
 #SBATCH --partition=booster
 #SBATCH --nodes=1

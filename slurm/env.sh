@@ -1,5 +1,5 @@
 #!/bin/bash
-# Variables communes aux jobs (test.sh, vague.sh) et aux terminaux interactifs.
+# Variables communes aux jobs (test.sh, noeud.sh, vague.sh) et à chaque commande des files.
 # À remplir une fois, puis depuis la racine du dépôt :  source slurm/env.sh
 export DIR="<dossier_projet>"                     # à remplacer
 case "$DIR" in "<"*) echo "Remplacez <dossier_projet> dans slurm/env.sh"

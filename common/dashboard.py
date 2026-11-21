@@ -1,7 +1,7 @@
 """Tableau de bord statique : transforme le journal des scores (SCORES_CSV) en une page HTML.
 
 Pas de serveur, pas d'internet : on régénère la page et on l'ouvre.
-    python -m common.dashboard              # écrit results/dashboard.html
+    python -m common.dashboard              # écrit dashboard.html à côté de SCORES_CSV
     python -m common.dashboard --bas met    # tâches où un score plus bas est meilleur
 Astuce : `watch -n 60 python -m common.dashboard` la régénère chaque minute.
 """

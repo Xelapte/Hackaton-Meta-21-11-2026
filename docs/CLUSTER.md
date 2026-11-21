@@ -6,7 +6,7 @@ Les GPU sont au centre de calcul de Jülich (JSC). On y accède par JuDoor. Les 
 
 | Machine | Internet | GPU | Rôle |
 |---|---|---|---|
-| Ordinateur d'un membre | oui | non | Terminal SSH, édition du code, `git push`. **Rien d'installé, rien de téléchargé.** |
+| Ordinateur d'un membre | oui | non | Terminal SSH seulement. **Rien d'installé, rien de téléchargé.** |
 | Nœud de login (`ssh jsc`) | oui | non | **Tous** les téléchargements et installations, `git`, dépôt des commandes dans les files. Pas de calcul lourd. |
 | Nœud GPU | **non** | 4 × 40 Go | Exécution des commandes des files, dans le job du titulaire. On ne s'y connecte pas. |
 
@@ -14,7 +14,7 @@ Le nœud de login et le nœud GPU voient le même dossier projet, `$DIR`, placé
 
 ## La connexion
 
-On utilise une seule clé SSH, créée sur l'ordinateur du membre : `~/.ssh/id_ed25519-JSC`. Sa partie publique est déposée dans JuDoor, avec une clause `from="…"` qui limite les adresses IP autorisées. L'alias `jsc` est défini dans `~/.ssh/config` : `ssh jsc`, `scp fichier jsc:`.
+Chaque membre a **sa propre** clé SSH pour JSC, créée sur son ordinateur : `~/.ssh/id_ed25519-JSC` ; on ne partage jamais une clé. Sa partie publique est déposée dans JuDoor, avec une clause `from="…"` qui limite les adresses IP autorisées. L'alias `jsc` est défini dans `~/.ssh/config` : `ssh jsc`, `scp fichier jsc:`.
 
 Si la connexion est refusée, c'est presque toujours parce que l'adresse IP a changé, par exemple sur le Wi-Fi du lieu. Il faut alors ajouter la plage d'adresses dans JuDoor.
 
@@ -62,14 +62,14 @@ ordinateur --ssh jsc--> nœud de login --dépose--> $DIR/queue/gpuN/attente/ --e
 
 - Le titulaire lance `bash setup/partage.sh <dossier_projet>`, qui crée les files et ouvre le dossier au groupe du projet.
 - Chaque membre ajoute `umask 002` à son `~/.bashrc` et clone le dépôt dans `$DIR/membres/<identifiant>/`.
-- Le titulaire lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il le relance avant la fin de `--time`. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
+- Le titulaire lance `sbatch slurm/noeud.sh` : un seul job, qui garde le nœud et exécute une file par GPU. Il programme la relève dès le début avec `bash slurm/relancer.sh` (`sbatch --dependency=afterany`) : le job suivant démarre à la fin du précédent, jamais deux nœuds payés. Une commande coupée par la fin du job est classée « interrompue » ; les commandes en attente ne sont pas perdues.
 
 **À chaque run**, depuis la racine de ton clone, sur le nœud de login :
 
 ```bash
 bash slurm/soumettre.sh <gpu> <nom_court> <commande...>   # ex. : 1 scrub_lr bash scrub/run.sh
 bash slurm/file.sh                                        # état des 4 files
-tail -f $DIR/queue/logs/<nom>.log                          # suivre le run
+tail -f $DIR/queue/logs/<nom affiché>.log                  # suivre le run (chemin affiché par soumettre.sh)
 bash slurm/annuler.sh <gpu>                               # arrêter la commande en cours
 touch $DIR/queue/STOP                                     # titulaire : fermer les files proprement
 ```

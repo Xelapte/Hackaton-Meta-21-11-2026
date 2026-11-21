@@ -17,7 +17,7 @@ CUDA_VISIBLE_DEVICES=0 bash met/run.sh        > "logs/gpu0-$SLURM_JOB_ID.log" 2>
 CUDA_VISIBLE_DEVICES=1 bash scrub/run.sh      > "logs/gpu1-$SLURM_JOB_ID.log" 2>&1 &
 CUDA_VISIBLE_DEVICES=2 bash pixelseal/run.sh  > "logs/gpu2-$SLURM_JOB_ID.log" 2>&1 &
 # GPU 3 (joker) : une copie modifiée d'un run.sh, avec un autre dossier de sortie (OUT=...).
-# Vide = GPU 3 libre pour la démo ou les terminaux interactifs.
+# Vide = GPU 3 libre pour la démo.
 JOKER=""                   # ex. : JOKER="met/run_joker.sh"
 if [ -n "$JOKER" ]; then
     CUDA_VISIBLE_DEVICES=3 bash "$JOKER"      > "logs/gpu3-$SLURM_JOB_ID.log" 2>&1 &
