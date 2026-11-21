@@ -18,3 +18,4 @@ export HF_HOME="${HF_HOME:-$DIR/hf_cache}"
 export HF_HUB_OFFLINE=1                           # pas d'internet sur les nœuds de calcul (API MET : voir met/)
 export SCORES_CSV="$DIR/scores.csv"               # journal des scores commun à toute l'équipe
 umask 002                                         # fichiers lisibles et modifiables par l'équipe
+export PYTHONUNBUFFERED=1
