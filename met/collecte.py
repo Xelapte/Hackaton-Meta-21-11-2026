@@ -70,14 +70,17 @@ def main():
         for l in open(sortie, encoding="utf-8"):
             r = json.loads(l); deja.add((r["endpoint"], r["id"], r["tirage"])); par_ep[r["endpoint"]] += 1
     jobs, prevu = [], Counter()
-    for t in range(args.tirages):
+    n_tir = {p["id"]: int(p.get("tirages") or args.tirages) for p in prompts}   # colonne « tirages » facultative
+    for t in range(max(n_tir.values())):
         for p in prompts:
+            if t >= n_tir[p["id"]]:
+                continue
             for e in eps:
                 if (e, p["id"], t) in deja or par_ep[e] + prevu[e] >= args.plafond:
                     continue
                 jobs.append((e, p, t)); prevu[e] += 1
     duree = len(jobs) * args.secondes_par_requete / max(1, args.parallele) / 60
-    print(f"Plan : {len(prompts)} prompts x {args.tirages} tirages, {len(eps)} endpoints, plafond {args.plafond}/endpoint")
+    print(f"Plan : {len(prompts)} prompts, {sum(n_tir.values())} réponses par endpoint au total, {len(eps)} endpoints, plafond {args.plafond}/endpoint")
     print(f"  déjà dans le fichier : {sum(par_ep.values())} ; à demander : {len(jobs)} "
           f"(par endpoint : min {min(prevu[e] for e in eps)}, max {max(prevu[e] for e in eps)}) ; "
           f"durée estimée ~{duree:.0f} min à {args.parallele} en parallèle", flush=True)
