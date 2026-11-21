@@ -4,6 +4,10 @@
                      englobante VRAIE de la zone tatouée, contre des boîtes décalées, agrandies, réduites,
                      tirées au hasard, et l'image entière. Si la vraie boîte se détache nettement, une recherche
                      de rectangle est viable. Mesure aussi la vitesse de décodage (boîtes / s).
+  --test occlusion   (H6a) Images full du train : on floute une boîte et on mesure la variation relative de la
+                     marge de décodage de l'image entière (moyenne de logit x signe du bit). Boîte d'un vrai trou
+                     (attendu ~0) contre boîte de même taille en zone tatouée (attendu < 0). Si ça sépare, on peut
+                     chercher les trous par occlusion.
   --test invariance  (H4) Images full du train : précision de bits de l'image, de ses miroirs et rotations.
                      Décide si l'augmentation miroir / rotation est permise.
 
@@ -80,7 +84,9 @@ def auc(pos, neg):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     off = Path(os.environ.get("OFFICIEL", ".")) / "Hackathon_Watermark_Localisation_Task"
-    ap.add_argument("--test", choices=["oracle", "invariance"], required=True)
+    ap.add_argument("--test", choices=["oracle", "invariance", "occlusion"], required=True)
+    ap.add_argument("--flou", type=float, default=4.0, help="occlusion : rayon du flou gaussien (pixels)")
+    ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--tache", type=Path, default=off)
     ap.add_argument("--data", type=Path, default=off / "release")
     ap.add_argument("--n", type=int, default=40, help="images par méthode")
@@ -89,6 +95,7 @@ def main():
     args = ap.parse_args()
     rng = np.random.default_rng(args.seed)
     dev = "cuda" if torch.cuda.is_available() else "cpu"
+    torch.set_num_threads(args.threads)
     if args.fake:
         meta = [{"image_name": f"i{k}", "method": METHODES[k % 3], "full_watermark": bool(k % 2),
                  "message": "".join(rng.choice(["0", "1"], 100))} for k in range(12)]
@@ -110,7 +117,7 @@ def main():
             wm = load_watermark(meth, models_dir=args.tache / "models", device=dev)
             if meth == "stegastamp":
                 print(f"stegastamp : fournisseurs ONNX {wm.sess.get_providers()}", flush=True)
-        full = args.test == "invariance"
+        full = args.test in ("invariance", "occlusion")
         its = [m for m in meta if m["method"] == meth and bool(m["full_watermark"]) == full]
         its = [its[i] for i in rng.permutation(len(its))[:args.n]]
         res = {}; t0 = time.time(); ncrops = 0
@@ -126,6 +133,35 @@ def main():
                     res.setdefault(nom, []).append(float(bits_justes(wm, [c], msg, dev)[0]))
                 res.setdefault("_taille", []).append((b[1] - b[0]) * (b[3] - b[2]) / 512 ** 2)
                 ncrops += len(crops)
+            elif args.test == "occlusion":
+                from PIL import ImageFilter
+                g = M[m["image_name"]]
+                lab, nb = ndimage.label(g == 0)
+                if nb == 0:
+                    continue
+                kk = 1 + int(np.argmax(ndimage.sum(g == 0, lab, range(1, nb + 1))))
+                ys, xs = np.where(lab == kk)
+                b = (ys.min() * 4, (ys.max() + 1) * 4, xs.min() * 4, (xs.max() + 1) * 4)
+                h, w = b[1] - b[0], b[3] - b[2]
+                tat = None                                   # même taille, entièrement (>= 95 %) en zone tatouée
+                for _ in range(200):
+                    ry = int(rng.integers(0, 512 - h + 1)); rx = int(rng.integers(0, 512 - w + 1))
+                    if g[ry // 4:(ry + h) // 4, rx // 4:(rx + w) // 4].mean() >= 0.95:
+                        tat = (ry, ry + h, rx, rx + w); break
+                if tat is None:
+                    continue
+                flou = np.asarray(Image.fromarray(img).filter(ImageFilter.GaussianBlur(args.flou)))
+                def occ(bb):
+                    o = img.copy(); o[bb[0]:bb[1], bb[2]:bb[3]] = flou[bb[0]:bb[1], bb[2]:bb[3]]; return o
+                ims = [img, occ(b), occ(tat)]
+                xx = torch.stack([torch.from_numpy(np.ascontiguousarray(c)).permute(2, 0, 1).float().div(255) for c in ims])
+                lg = wm.logits(xx.to(dev) if not isinstance(wm, FauxTatouage) else xx).float().cpu().numpy()
+                sg = msg.astype(np.float32) * 2 - 1
+                marge = (lg * sg[None]).mean(1)
+                res.setdefault("trou", []).append(float(marge[1] / marge[0] - 1))
+                res.setdefault("zone tatouée", []).append(float(marge[2] / marge[0] - 1))
+                res.setdefault("_taille", []).append(h * w / 512 ** 2)
+                ncrops += 3
             else:
                 x = {"original": img, "miroir horizontal": img[:, ::-1], "miroir vertical": img[::-1],
                      "rotation 90": np.rot90(img), "rotation 180": np.rot90(img, 2)}
@@ -139,7 +175,11 @@ def main():
             if nom.startswith("_"):
                 continue
             v = np.array(v)
-            print(f"  {nom:18s}: bits justes moyenne {v.mean():.3f}  q10/50/90 {np.quantile(v, [.1, .5, .9]).round(3)}", flush=True)
+            lib = "variation relative de la marge" if args.test == "occlusion" else "bits justes"
+            print(f"  {nom:18s}: {lib} moyenne {v.mean():.3f}  q10/50/90 {np.quantile(v, [.1, .5, .9]).round(3)}", flush=True)
+        if args.test == "occlusion" and "trou" in res:
+            print(f"  AUC (trou > zone tatouée) : {auc(res['trou'], res['zone tatouée']):.3f} ; "
+                  f"taille médiane de la boîte {np.median(res['_taille']):.3f}", flush=True)
         if args.test == "oracle" and "hasard" in res:
             vr = np.array(res["vraie"]); ts = np.array(res["_taille"])
             print(f"  AUC vraie boîte contre hasard : {auc(res['vraie'], res['hasard']):.3f} ; "
