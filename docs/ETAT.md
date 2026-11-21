@@ -4,13 +4,17 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 ## Ce qu'on sait des tests
 
-À remplir à 12h, à partir des énoncés.
-
-| Tâche | Format attendu | Métrique (plus haut ou plus bas = mieux) | Tests visibles ou cachés | Soumissions autorisées |
+| Tâche | Format rendu | Métrique | Soumissions | Détails |
 |---|---|---|---|---|
-| Pixel Seal | | | | |
-| MET | | | | |
-| SCRUB | | | | |
+| 1 Tatouage | carte 128×128 par image | mIoU (plus haut = mieux) | à préciser (README) | docs/TACHE_1_watermark.md |
+| 2 Model Equality | CSV endpoint,family,model | 0,1 MCC famille + 0,9 MCC modèle | 1 / 30 min ; budget 100 réponses/endpoint | docs/TACHE_2_model_equality.md |
+| 3 Unlearning | state_dict .pt | forget × retain, 0 si précision < 70 % | à préciser | docs/TACHE_3_unlearning.md |
+
+## Budget de la tâche 2 (à tenir à jour)
+
+| Endpoints | Réponses utilisées / 100 | Plan |
+|---|---|---|
+| ep-01 … ep-33 | | |
 
 ## Les meilleurs scores
 

@@ -1,5 +1,7 @@
 # Tâche Pixel Seal (GPU 2)
 
+> **Contexte du papier, pas la tâche réelle.** La tâche du hackathon est décrite dans `docs/TACHE_1_watermark.md`.
+
 Le papier : *Pixel Seal*, arXiv 2512.16874. Code officiel : github.com/facebookresearch/videoseal (licence MIT), cloné dans `$DIR/repos/videoseal`.
 
 ## Le principe

@@ -5,21 +5,22 @@ Lis ce fichier en entier avant de toucher au code. Les détails sont dans :
 - `docs/CLUSTER.md` : machines, Slurm, GPU, mode hors ligne ;
 - `docs/STRATEGIE.md` : planning, règles de score, priorités ;
 - `docs/ETAT.md` : l'état courant du travail. Lis-le au début, mets-le à jour à la fin ;
-- `pixelseal/CLAUDE.md`, `met/CLAUDE.md` et `scrub/CLAUDE.md` : une tâche chacun.
+- **`docs/TACHE_1_watermark.md`, `docs/TACHE_2_model_equality.md`, `docs/TACHE_3_unlearning.md` : les vraies tâches, à lire avant de coder** ;
+- `pixelseal/CLAUDE.md`, `met/CLAUDE.md` et `scrub/CLAUDE.md` : le contexte des trois papiers (utile, mais ce ne sont pas les tâches).
 
-## Le contexte en trois lignes
+## Le contexte
 
-Le hackathon dure 24 h, du samedi 21/11 à 12h au dimanche 22/11 à 12h, puis vient le pitch devant le jury jusqu'à 15h. Il y a **trois tâches, toutes obligatoires**, et chacune est notée par des tests fournis par le jury. Le score de chaque tâche compte dans le classement.
+Le hackathon (European AI Championship, Paris) va du samedi 21/11 à 14h30 au dimanche 22/11 à 12h ; ensuite, présentations des 6 meilleures équipes et jury. **Trois tâches, toutes obligatoires**, notées par le serveur des organisateurs (classement en direct, classement final sur une partie cachée des tests).
 
-| Tâche | Papier | Dossier | GPU |
-|---|---|---|---|
-| Tatouage d'images (watermarking) | Pixel Seal, arXiv 2512.16874 | `pixelseal/` | 2 |
-| Audit d'API de modèles de langage | Model Equality Testing (MET), arXiv 2410.20247 | `met/` | 0 |
-| Désapprentissage (machine unlearning) | SCRUB, arXiv 2302.09880 | `scrub/` | 1 |
+| Tâche | Ce qu'on rend | Score | Code du kit | Où ça tourne |
+|---|---|---|---|---|
+| 1. Localiser le tatouage (PixelSeal, TrustMark, StegaStamp) | une carte 128×128 par image | mIoU | — (à écrire, voir doc) | file GPU 2 |
+| 2. Model Equality : 33 endpoints d'API | CSV `endpoint,family,model` | 0,1 MCC famille + 0,9 MCC modèle | `met/analyse.py` | **nœud de login** (API, CPU) |
+| 3. Unlearning : ViT-B/16, 3 500 images à oublier | `state_dict` (.pt) | forget × retain, 0 si précision < 70 % | `unlearning/unlearn.py` | file GPU 1 |
 
-Le GPU 3 est un « joker » : l'équipe le réattribue selon les scores, puis le réserve à la démo.
+GPU 0 et 3 : libres pour les balayages et les entraînements longs (décision en équipe). La tâche 2 n'a pas besoin de GPU.
 
-Toutes les équipes ont les mêmes papiers. Les papiers donnent la baseline ; les points se gagnent en optimisant **la métrique des tests du jury**, qui n'est pas forcément celle du papier.
+**Le dossier officiel `$OFFICIEL`** (`/p/scratch/training2666/huang25/Epi84`, créé par `hackathon_setup.sh`) contient les données et un `.venv` par tâche : `model_equality/`, `unlearning/`, `Hackathon_Watermark_Localisation_Task/`. Dans une file : `bash slurm/soumettre.sh <gpu> <nom> --venv unlearning|met|watermark <commande>`. Les soumissions et l'API passent par `34.147.229.55` en HTTP : **sur le nœud de login seulement** (les nœuds de calcul n'ont pas internet). **Clé d'API d'équipe : jamais dans git**, toujours `os.environ["TEAM_API_KEY"]`.
 
 ## Les règles absolues
 
@@ -29,7 +30,7 @@ Toutes les équipes ont les mêmes papiers. Les papiers donnent la baseline ; le
 4. **Un GPU par tâche.** Fixe toujours `CUDA_VISIBLE_DEVICES`. Dans le code, écris `"cuda"`, jamais `"cuda:2"` : le GPU choisi s'appelle toujours `cuda:0`.
 5. **Chaque run écrit son score** avec `common.scores.log_score(tache, config, score, notes)`. Le journal est partagé (`$DIR/scores.csv`, via `SCORES_CSV` dans `slurm/env.sh`). Un résultat qui n'y est pas n'existe pas pour l'équipe.
 6. **Ne commite jamais** de poids, de modèles, de données, `env/`, de jetons (Hugging Face, GitHub) ni de grosses sorties. Le `.gitignore` les exclut déjà : ne le contourne pas.
-7. **Ne soumets rien aux tests officiels sans une décision de l'équipe, transmise par un humain** : le nombre de soumissions peut être limité.
+7. **Ne soumets rien au serveur (soumissions, et requêtes sur les endpoints `ep-` de la tâche 2, au budget limité) sans une décision de l'équipe, transmise par un humain** : le nombre de soumissions peut être limité.
 8. **Petits tests libres, gros runs annoncés.** Un petit test, c'est une commande déposée dans la file du GPU de la tâche (`slurm/soumettre.sh`), de moins de 30 minutes, dont tu suis le journal : tu peux la lancer. Un run plus long ou de nuit, ou un gros téléchargement, s'annonce d'abord sur le canal d'équipe avec sa durée : tu demandes à l'humain de l'annoncer, et tu ne le lances qu'après sa confirmation. Le GPU 3 (joker) et les soumissions officielles se décident en équipe. N'annule jamais la commande d'un autre membre.
 9. **Pas d'affirmation sans mesure.** Ne dis pas qu'un changement améliore le score tant qu'un run ne l'a pas montré dans `scores.csv`.
 
@@ -49,7 +50,10 @@ slurm/soumettre.sh         déposer une commande dans la file d'un GPU
 slurm/file.sh, annuler.sh  état des files ; arrêter la commande en cours
 slurm/vague.sh, shell.sh   secours (titulaire seulement)
 setup/partage.sh           crée les files, accès ACL de l'équipe (une fois) ; ajouter_membre.sh pour un retardataire
+setup/fermer.sh            ferme le dossier OFFICIEL aux autres équipes (ACL)
 pixelseal/ met/ scrub/     code de chaque tâche ; run.sh = la baseline complète
+met/analyse.py             tâche 2 réelle (API, nœud de login)
+unlearning/unlearn.py      tâche 3 réelle (baseline ViT)
 logs/                      sorties des jobs (non versionnées)
 ```
 

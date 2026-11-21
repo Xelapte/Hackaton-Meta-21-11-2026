@@ -1,5 +1,7 @@
 # Tâche Model Equality Testing (GPU 0)
 
+> **Contexte du papier, pas la tâche réelle.** La tâche du hackathon est décrite dans `docs/TACHE_2_model_equality.md`.
+
 Le papier : *Model Equality Testing: Which model is this API serving?*, arXiv 2410.20247. Code officiel : github.com/i-gao/model-equality-testing, cloné dans `$DIR/repos/model-equality-testing`.
 
 ## Le principe

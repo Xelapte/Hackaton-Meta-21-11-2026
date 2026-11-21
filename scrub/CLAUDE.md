@@ -1,5 +1,7 @@
 # Tâche SCRUB (GPU 1)
 
+> **Contexte du papier, pas la tâche réelle.** La tâche du hackathon est décrite dans `docs/TACHE_3_unlearning.md`.
+
 Le papier : *Towards Unbounded Machine Unlearning* (SCRUB), arXiv 2302.09880. Code officiel : github.com/Meghdad92/SCRUB, cloné dans `$DIR/repos/SCRUB`. Il est fait surtout de notebooks et importe wandb : avec `WANDB_MODE=disabled`, il fonctionne sans internet.
 
 ## Le principe

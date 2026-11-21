@@ -23,7 +23,8 @@
 
 ## Les décisions déjà prises
 
-- **Les GPU :** 0 pour MET, 1 pour SCRUB, 2 pour Pixel Seal, et 3 pour le joker puis la démo.
+- **Les GPU :** 1 pour l'unlearning, 2 pour le tatouage ; 0 et 3 pour les balayages et entraînements longs. La tâche 2 (API) n'utilise pas de GPU.
+- **Budget de la tâche 2 :** 100 réponses par endpoint pour toute la compétition. Le plan de requêtes se décide en équipe, après mise au point sur les endpoints `ref-` gratuits.
 - **Pas d'interface web de synchronisation.** On utilise `scores.csv`, `python -m common.scores`, `common.dashboard`, un tableau de tâches et des points d'équipe.
 - **La démo du pitch** se prépare seulement si les scores sont assurés, dimanche entre 7h et 10h.
 
