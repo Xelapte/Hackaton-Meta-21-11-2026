@@ -20,7 +20,8 @@ Ce fichier est le relais entre les membres et les agents. Lis-le en arrivant. Me
 
 | Tâche | Score | Configuration | Commit | Heure |
 |---|---|---|---|---|
-| Pixel Seal | | | | |
+| Tatouage (mIoU local) | 0,4705 (hors pli, 5 plis) | `--mode unet --feats cartes_feats.npz --folds 5 --aug --epochs 40` (après `--mode cartes`) | 9d78d06 | 17h28 |
+| Tatouage, sans entraînement | 0,4339 (train) | `--mode direct` | 9d78d06 | 17h20 |
 | MET | | | | |
 | SCRUB | | | | |
 
@@ -53,3 +54,5 @@ Pour l'instant précis : `bash slurm/file.sh`. Ce tableau sert aux longs runs et
 ## Le journal des décisions
 
 - _hh:mm_ — décision prise, et pourquoi.
+- 17h20 — Tatouage : les logits par position corrélés au message connu (PixelSeal 512 px, TrustMark 224 px) battent les fenêtres glissantes (TrustMark 0,29 → 0,47). StegaStamp : « re-tatouer et corréler » (R' = embed(I, msg) − I, corrélation locale, bloc 16) 0,26 → 0,36. Le canal de détection de PixelSeal (canal 0) est faible (0,33) : essayé, abandonné. Le re-tatouage de PixelSeal et TrustMark ne marche pas (~0,27).
+- 17h30 — Tatouage, diagnostic : la part tatouée est bimodale (1/3 < 10 %, 1/3 > 90 %). L'oracle « classe majoritaire » vaut 0,455 ; on est à 0,47 : on ne voit presque pas la petite zone, c'est là qu'est le reste du score. Piste en cours : données synthétiques (`watermark/synthetique.py` : trous, objets transplantés, rectangles) pour entraîner le U-Net.
