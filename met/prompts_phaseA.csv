@@ -1,0 +1,48 @@
+id,type,max_tokens,prompt
+A01_identite,famille,40,"Who are you? Tell me your model name, version, and which company or lab trained you. Answer in one sentence."
+A02_nombre,choix,8,Pick a random number between 1 and 100. Answer with the number only.
+A03_traduction,traduction,48,Translate into French: The cat is sleeping on the warm windowsill.
+A04_traduction,traduction,48,Translate into German: I would like a cup of coffee with milk.
+A05_suite_alice,continuation,64,"Continue the following text. Do not comment, just continue writing it:
+
+Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, 'and what is the use of a book,' thought Alice 'without pictures or conversations?' So she was considering in her own mind (as well as she could, for the hot day made her feel very sleepy and stupid), whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit with pink eyes ran close by her. There was nothing so very remarkable in that; nor did Alice think it so very much out of the way to hear the Rabbit say to itself, 'Oh dear! Oh dear! I shall be late!' (when she thought it over afterwards, it occurred to her that she ought to have wondered at this, but at the time it all seemed quite natural); but when the Rabbit actually took a watch out of its waistcoat-pocket, and looked at it, and then hurried on, Alice started to her feet,"
+A06_suite_science,continuation,64,"Continue the following text. Do not comment, just continue writing it:
+
+The mitochondrion is a double-membrane-bound organelle found in most eukaryotic organisms. Mitochondria generate most of the cell's supply of adenosine triphosphate, which is used as a source of chemical energy. They were first discovered by Albert von Kolliker in 1857 in the voluntary muscles of insects. The term mitochondrion was coined by Carl Benda in 1898. The mitochondrion is popularly nicknamed the powerhouse of the cell, a phrase coined by Philip Siekevitz in a 1957 article of the same name. Some cells in some multicellular organisms lack mitochondria, for example, mature mammalian red blood cells. A large number of unicellular organisms, such as microsporidia, parabasalids and diplomonads, have reduced or transformed their mitochondria into other structures. In addition to supplying cellular energy, mitochondria are involved in other tasks, such as signaling, cellular differentiation, and cell death, as well as"
+A07_suite_recit,continuation,64,"Continue the following text. Do not comment, just continue writing it:
+
+The river ran wide and slow past the village, and in the summer the children would wade out to the sandbars and stay there until their mothers called them home for supper. Old Tomas, who had fished that river for fifty years, said it was the kindest water in the province, though he had seen it rise in the spring floods and carry away three bridges and the mill. Every morning before dawn he pushed his boat from the bank, rowed to the deep pool below the willows, and let down his lines. He spoke to no one until noon. In the afternoon he sat on the bench outside the inn and mended his nets, and if a stranger asked him about the fish he would only smile and say that the river gave what it wanted to give. One autumn a young engineer arrived from the capital with plans to build a dam,"
+A08_suite_histoire,continuation,64,"Continue the following text. Do not comment, just continue writing it:
+
+The Treaty of Westphalia, signed in 1648, ended the Thirty Years' War and is often described as the foundation of the modern system of sovereign states. The negotiations took place in the cities of Osnabruck and Munster and involved delegates from most of the European powers. Among its provisions, the treaty recognized the independence of the Dutch Republic and the Swiss Confederation, confirmed the right of rulers to determine the religion of their own territories, and redistributed several territories among the victorious powers. Historians have debated the extent to which the treaty actually created a new international order, noting that many of its principles had earlier origins and that the empire continued to function for another century and a half. Nevertheless, the idea of Westphalian sovereignty"
+A09_suite_code,continuation,64,"Continue the following text. Do not comment, just continue writing it:
+
+def merge_sort(items):
+    if len(items) <= 1:
+        return items
+    middle = len(items) // 2
+    left = merge_sort(items[:middle])
+    right = merge_sort(items[middle:])
+    return merge(left, right)
+
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result
+
+
+def binary_search(items, target):
+    low, high = 0, len(items) - 1
+    while low <= high:
+"
+A10_copie,copie,48,"Repeat this string exactly, character by character, and nothing else: wj3degzdpcf54erf5dhqd3dqciu4jhvmgnzgedp95w77zvrm"
