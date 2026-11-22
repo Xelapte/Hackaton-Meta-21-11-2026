@@ -1,0 +1,12 @@
+{
+ "_doc": "Scores leaderboard (public). Cle = modele_en_cache@beta (beta = baisse du biais des 9 classes entieres appliquee apres coup).",
+ "k1_a10@0": 0.0143,
+ "d12@0": 0.043,
+ "d16@0": 0.0453,
+ "f20_p8@8": 0.1348,
+ "r_b8@0": 0.1247,
+ "f20_p8@12": 0.0592,
+ "f20_p8@6": 0.1381,
+ "r_b8_e5@2": 0.1198,
+ "f20_p8@7": 0.1387
+}

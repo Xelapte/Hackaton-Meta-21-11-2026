@@ -1,0 +1,4 @@
+{"id": "R3_coin", "prompt": "Simulate 150 fair coin flips. Output only the results, as H or T separated by single spaces, nothing else."}
+{"id": "R7_bits", "prompt": "Generate a random sequence of 250 bits (0 or 1), separated by single spaces. Output only the bits, nothing else."}
+{"id": "R8_abcd", "prompt": "Generate a random sequence of 250 letters, each chosen uniformly at random from A, B, C and D, separated by single spaces. Output only the letters, nothing else."}
+{"id": "R9_rps", "prompt": "Simulate 250 random rock-paper-scissors moves. Output only the moves, as R, P or S separated by single spaces, nothing else."}

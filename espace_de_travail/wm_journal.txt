@@ -1,0 +1,36 @@
+[2026-11-22 09:24:22] v61/subs/v61_a.pt
+Successfully submitted.
+Server response: {'submission_id': 3826, 'status': 'success', 'score': 0.6538, 'previous_best': 0.5042, 'delta': 0.1495, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 3826
+[2026-11-22 09:47:09] v62/subs/v62_a.pt
+Successfully submitted.
+Server response: {'submission_id': 3894, 'status': 'success', 'score': 0.6814, 'previous_best': 0.6538, 'delta': 0.0276, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 3894
+[2026-11-22 09:59:26] v62/subs/v62_b.pt
+Successfully submitted.
+Server response: {'submission_id': 3931, 'status': 'success', 'score': 0.6936, 'previous_best': 0.6814, 'delta': 0.0122, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 3931
+[2026-11-22 10:17:55] v62/subs/v62_c.pt
+Successfully submitted.
+Server response: {'submission_id': 3974, 'status': 'success', 'score': 0.7252, 'previous_best': 0.6936, 'delta': 0.0316, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 3974
+[2026-11-22 10:37:44] v62/subs/v62_d.pt
+Successfully submitted.
+Server response: {'submission_id': 4027, 'status': 'success', 'score': 0.7363, 'previous_best': 0.7252, 'delta': 0.0111, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 4027
+[2026-11-22 10:57:58] v62/subs/v62_f.pt
+Successfully submitted.
+Server response: {'submission_id': 4080, 'status': 'success', 'score': 0.74, 'previous_best': 0.7363, 'delta': 0.0037, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 4080
+[2026-11-22 11:23:18] v62/subs/v62_g.pt
+Successfully submitted.
+Server response: {'submission_id': 4155, 'status': 'success', 'score': 0.7549, 'previous_best': 0.74, 'delta': 0.0149, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 4155
+[2026-11-22 11:37:58] v62/subs/v62_k.pt
+Successfully submitted.
+Server response: {'submission_id': 4204, 'status': 'success', 'score': 0.761, 'previous_best': 0.7549, 'delta': 0.0061, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 4204
+[2026-11-22 11:56:16] v62/subs/v62_m.pt
+Successfully submitted.
+Server response: {'submission_id': 4258, 'status': 'success', 'score': 0.7621, 'previous_best': 0.761, 'delta': 0.0011, 'improved': True, 'message': 'New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.'}
+Submission ID: 4258

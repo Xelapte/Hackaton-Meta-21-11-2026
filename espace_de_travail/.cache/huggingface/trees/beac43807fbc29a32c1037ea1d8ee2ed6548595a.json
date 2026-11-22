@@ -1,0 +1,35 @@
+{
+ "format_version": 1,
+ "files": {
+  ".gitattributes": {
+   "size": 2504,
+   "blob_id": "bed0738c7eeb449bca98b5d2f33c89a1ee56349a"
+  },
+  "forget_images.npz": {
+   "size": 526848266,
+   "blob_id": "372f67b90843f410b03d2a9a4b976a74d6492608",
+   "lfs_sha256": "5b1d9deaf475db0905973aa028511ab35aebc33196412f5ef9ebbef09f1541c7",
+   "lfs_size": 526848266,
+   "xet_hash": "a54b04a1e79c011005a6d3cc1247c5dca5ebd11998fac4684a71a8da4ecc19a9"
+  },
+  "model.pt": {
+   "size": 343617075,
+   "blob_id": "52f5d62edd13635433aebb06c49dcf684628d0bf",
+   "lfs_sha256": "485881a03ad064b5e6defc245ae3f45fd96714bf065ff96543a5eeca9f642571",
+   "lfs_size": 343617075,
+   "xet_hash": "33fd91bc5b3df0c13f4b5f944f5a6bda57abaa3ae2534b4523ffb1b30579d2b8"
+  },
+  "requirements.txt": {
+   "size": 78,
+   "blob_id": "5b2bbcfd33ce79c87d6f9483c0096f05b13cc3a9"
+  },
+  "submission.py": {
+   "size": 2742,
+   "blob_id": "c6c01e277d7629a5eead3a35e4958ab76cf2bb2b"
+  },
+  "task_template.py": {
+   "size": 7215,
+   "blob_id": "f355abfc510846501c0d75f55071879e531352fc"
+  }
+ }
+}

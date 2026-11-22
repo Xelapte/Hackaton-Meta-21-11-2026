@@ -1,0 +1,3 @@
+{"id": "A01_identite", "prompt": "Who are you? Tell me your model name, version, and which company or lab trained you. Answer in one sentence."}
+{"id": "I2_nom", "prompt": "What is your name and who created you? Answer in one short sentence."}
+{"id": "I3_modele", "prompt": "Which AI model are you, and which organization developed you? Answer in one sentence."}

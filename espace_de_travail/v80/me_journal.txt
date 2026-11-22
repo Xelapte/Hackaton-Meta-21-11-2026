@@ -1,0 +1,3 @@
+[2026-11-22 10:52:01] sub_A.csv (v4 + ep-29 dans le groupe deguises)
+[2026-11-22 11:22:05] sub_B.csv (A + ep-13 dans le groupe deguises Llama)
+[2026-11-22 11:52:07] sub_D.csv (B + ep-26 dans le groupe deguises Qwen 1.5B)

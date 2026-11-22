@@ -1,0 +1,664 @@
+[2026-11-21 21:21:37] v16/subs/rec_a1.2.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting rec_a1.2.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 21:31:59] v16/subs/rec_a1.2.pt
+Submitting rec_a1.2.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1202
+Previous best: 0.1506  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 21:42:05] v16/subs/e3_b7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting e3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 21:44:17] v16/subs/e3_b7.pt
+Submitting e3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1324
+Previous best: 0.1506  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 21:55:27] v16/subs/e3_b7.pt
+Submitting e3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1324
+Previous best: 0.1506  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 22:06:51] v16/subs/e2_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 537 seconds before sending another submission.
+Submitting e2_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:17:17] v16/subs/e2_b7.pt
+Submitting e2_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0959
+Previous best: 0.1506  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 22:28:53] v17/subs/f20_k64_d6_b7.pt
+Submitting f20_k64_d6_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1523
+Previous best: 0.1506  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-21 22:40:45] v19/subs/ref_l05_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 500 seconds before sending another submission.
+Submitting ref_l05_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:47:43] v18/subs/k16_wr1_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 81 seconds before sending another submission.
+Submitting k16_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:48:19] v18/subs/k16_wr1_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 46 seconds before sending another submission.
+Submitting k16_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:48:54] v18/subs/k16_wr1_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 10 seconds before sending another submission.
+Submitting k16_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:49:30] v18/subs/k16_wr1_b7.pt
+Submitting k16_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1528
+Previous best: 0.1523  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-21 22:59:13] v17/subs/f20_k16_d6_at025_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 16 seconds before sending another submission.
+Submitting f20_k16_d6_at025_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 22:59:48] v17/subs/f20_k16_d6_at025_b7.pt
+Submitting f20_k16_d6_at025_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1526
+Previous best: 0.1528  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 23:09:01] v19/subs/ref_l05.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 45 seconds before sending another submission.
+Submitting ref_l05.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:09:38] v19/subs/ref_l05.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting ref_l05.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:10:16] v19/subs/ref_l05.pt
+Submitting ref_l05.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0544
+Previous best: 0.1528  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 23:19:36] v18/subs/k16_wr1_at025_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 39 seconds before sending another submission.
+Submitting k16_wr1_at025_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:20:13] v18/subs/k16_wr1_at025_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 1 seconds before sending another submission.
+Submitting k16_wr1_at025_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:20:50] v18/subs/k16_wr1_at025_b7.pt
+Submitting k16_wr1_at025_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1552
+Previous best: 0.1528  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-21 23:30:00] v16/subs/e1_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 49 seconds before sending another submission.
+Submitting e1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:30:35] v16/subs/e1_b7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting e1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:31:15] v16/subs/e1_b7.pt
+Submitting e1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0848
+Previous best: 0.1552  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-21 23:40:27] v25/subs/mfa_b6.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 48 seconds before sending another submission.
+Submitting mfa_b6.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:41:02] v25/subs/mfa_b6.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting mfa_b6.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-21 23:41:43] v25/subs/mfa_b6.pt
+Submitting mfa_b6.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1169
+Previous best: 0.1552  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 00:09:09] v26/subs/s1_b7.pt
+Submitting s1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1552
+Previous best: 0.1552  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 00:19:35] v27/subs/sans_B.pt
+Submitting sans_B.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1609
+Previous best: 0.1552  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 00:29:56] v27/subs/sans_C.pt
+Submitting sans_C.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.166
+Previous best: 0.1609  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 00:39:06] v27/subs/tous_b5.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 51 seconds before sending another submission.
+Submitting tous_b5.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 00:39:41] v27/subs/tous_b5.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 15 seconds before sending another submission.
+Submitting tous_b5.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 00:40:16] v27/subs/tous_b5.pt
+Submitting tous_b5.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1446
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 00:50:03] v31/subs/Cpart_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 13 seconds before sending another submission.
+Submitting Cpart_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 00:50:38] v31/subs/Cpart_b7.pt
+Submitting Cpart_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1626
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:00:16] v31/subs/BCpart_b7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting BCpart_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:00:56] v31/subs/BCpart_b7.pt
+Submitting BCpart_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1315
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:10:09] v27/subs/cinq_a.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 49 seconds before sending another submission.
+Submitting cinq_a.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:10:44] v27/subs/cinq_a.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 11 seconds before sending another submission.
+Submitting cinq_a.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:11:22] v27/subs/cinq_a.pt
+Submitting cinq_a.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.146
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:20:34] v27/subs/p29.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 44 seconds before sending another submission.
+Submitting p29.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:21:13] v27/subs/p29.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 4 seconds before sending another submission.
+Submitting p29.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:21:54] v27/subs/p29.pt
+Submitting p29.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1648
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:31:11] v33/subs/h20_w4.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 46 seconds before sending another submission.
+Submitting h20_w4.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:31:48] v33/subs/h20_w4.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 10 seconds before sending another submission.
+Submitting h20_w4.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:32:24] v33/subs/h20_w4.pt
+Submitting h20_w4.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0837
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:42:23] v27/subs/m0.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 1 seconds before sending another submission.
+Submitting m0.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 01:42:58] v27/subs/m0.pt
+Submitting m0.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1499
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 01:53:17] v34/subs/rd_r2_b7.pt
+Submitting rd_r2_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1291
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 02:02:37] v34/subs/rd_r2.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 41 seconds before sending another submission.
+Submitting rd_r2.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:03:12] v34/subs/rd_r2.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting rd_r2.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:03:52] v34/subs/rd_r2.pt
+Submitting rd_r2.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0341
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 02:14:25] v27/subs/m38.pt
+Submitting m38.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1515
+Previous best: 0.166  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 02:24:18] v36/subs/ext_wr1_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting ext_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:24:55] v36/subs/ext_wr1_b7.pt
+Submitting ext_wr1_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.168
+Previous best: 0.166  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 02:34:58] v27/subs/sans_BC.pt
+Submitting sans_BC.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1383
+Previous best: 0.168  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 02:44:34] v36/subs/ext_wr3_b7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 28 seconds before sending another submission.
+Submitting ext_wr3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:45:09] v36/subs/ext_wr3_b7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting ext_wr3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:45:49] v36/subs/ext_wr3_b7.pt
+Submitting ext_wr3_b7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1577
+Previous best: 0.168  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 02:55:06] v36/subs/ext_wr1_g10_7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 47 seconds before sending another submission.
+Submitting ext_wr1_g10_7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:55:42] v36/subs/ext_wr1_g10_7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting ext_wr1_g10_7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:56:23] v36/subs/ext_wr1_g10_7.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting ext_wr1_g10_7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 02:57:03] v36/subs/ext_wr1_g10_7.pt
+Submitting ext_wr1_g10_7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1865
+Previous best: 0.168  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 03:06:17] v36/subs/ext_wr1_g7_4.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 46 seconds before sending another submission.
+Submitting ext_wr1_g7_4.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:06:52] v36/subs/ext_wr1_g7_4.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 10 seconds before sending another submission.
+Submitting ext_wr1_g7_4.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:07:28] v36/subs/ext_wr1_g7_4.pt
+Submitting ext_wr1_g7_4.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1555
+Previous best: 0.1865  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 03:18:09] v40/subs/t3_9_g10_7.pt
+Submitting t3_9_g10_7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.184
+Previous best: 0.1865  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 03:27:43] v43/subs/ext_wr1_g10_10.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 22 seconds before sending another submission.
+Submitting ext_wr1_g10_10.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:28:23] v43/subs/ext_wr1_g10_10.pt
+Submitting ext_wr1_g10_10.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1894
+Previous best: 0.1865  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 03:37:48] v43/subs/ext_wr1_g13_13.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting ext_wr1_g13_13.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:38:31] v43/subs/ext_wr1_g13_13.pt
+Submitting ext_wr1_g13_13.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1424
+Previous best: 0.1894  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 03:48:31] v43/subs/ext_wr1_a14.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 1 seconds before sending another submission.
+Submitting ext_wr1_a14.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:49:10] v43/subs/ext_wr1_a14.pt
+Submitting ext_wr1_a14.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2319
+Previous best: 0.1894  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 03:58:40] v46/subs/a2_a14.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 25 seconds before sending another submission.
+Submitting a2_a14.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 03:59:20] v46/subs/a2_a14.pt
+Submitting a2_a14.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2304
+Previous best: 0.2319  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 04:09:12] v43/subs/orig_a28.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 8 seconds before sending another submission.
+Submitting orig_a28.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:09:48] v43/subs/orig_a28.pt
+Submitting orig_a28.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.0
+Previous best: 0.2319  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 04:19:00] v43/subs/ext_wr1_t08_a14.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 44 seconds before sending another submission.
+Submitting ext_wr1_t08_a14.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:19:39] v43/subs/ext_wr1_t08_a14.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting ext_wr1_t08_a14.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:20:16] v43/subs/ext_wr1_t08_a14.pt
+Submitting ext_wr1_t08_a14.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2455
+Previous best: 0.2319  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 04:30:21] v46/subs/s3_4_a13.pt
+Submitting s3_4_a13.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1755
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 04:39:34] v43/subs/ext_wr1_t05_a11.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 47 seconds before sending another submission.
+Submitting ext_wr1_t05_a11.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:40:10] v43/subs/ext_wr1_t05_a11.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 9 seconds before sending another submission.
+Submitting ext_wr1_t05_a11.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:40:48] v43/subs/ext_wr1_t05_a11.pt
+Submitting ext_wr1_t05_a11.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.17
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 04:50:05] v47/subs/c0_b21.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 44 seconds before sending another submission.
+Submitting c0_b21.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:50:40] v47/subs/c0_b21.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting c0_b21.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 04:51:17] v47/subs/c0_b21.pt
+Submitting c0_b21.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2301
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:00:46] v46/subs/a2_t065_a13.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 29 seconds before sending another submission.
+Submitting a2_t065_a13.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:01:22] v46/subs/a2_t065_a13.pt
+Submitting a2_t065_a13.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1822
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:10:36] v47/subs/c38_b21.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 45 seconds before sending another submission.
+Submitting c38_b21.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:11:12] v47/subs/c38_b21.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 4 seconds before sending another submission.
+Submitting c38_b21.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:11:54] v47/subs/c38_b21.pt
+Submitting c38_b21.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2399
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:22:08] v46/subs/d4_a13.pt
+Submitting d4_a13.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1883
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:31:25] v43/subs/aucune_s30_31_b20.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 44 seconds before sending another submission.
+Submitting aucune_s30_31_b20.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:32:00] v43/subs/aucune_s30_31_b20.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 8 seconds before sending another submission.
+Submitting aucune_s30_31_b20.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:32:36] v43/subs/aucune_s30_31_b20.pt
+Submitting aucune_s30_31_b20.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.1985
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:41:49] v43/subs/aucune_s0_38_b19.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 41 seconds before sending another submission.
+Submitting aucune_s0_38_b19.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:42:29] v43/subs/aucune_s0_38_b19.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 5 seconds before sending another submission.
+Submitting aucune_s0_38_b19.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:43:05] v43/subs/aucune_s0_38_b19.pt
+Submitting aucune_s0_38_b19.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2246
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 05:52:25] v50/subs/sv15_w1_a16.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 43 seconds before sending another submission.
+Submitting sv15_w1_a16.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:53:01] v50/subs/sv15_w1_a16.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting sv15_w1_a16.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 05:53:37] v50/subs/sv15_w1_a16.pt
+Submitting sv15_w1_a16.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 06:03:12] v50/subs/sv10_w3_d10_t115_a19.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 29 seconds before sending another submission.
+Submitting sv10_w3_d10_t115_a19.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:03:47] v50/subs/sv10_w3_d10_t115_a19.pt
+Submitting sv10_w3_d10_t115_a19.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2243
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 06:13:24] v47/subs/c38_t08_b21.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 25 seconds before sending another submission.
+Submitting c38_t08_b21.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:13:58] v47/subs/c38_t08_b21.pt
+Submitting c38_t08_b21.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.225
+Previous best: 0.2455  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 06:23:22] v47/subs/h4_all_g22.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 35 seconds before sending another submission.
+Submitting h4_all_g22.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:24:00] v47/subs/h4_all_g22.pt
+Submitting h4_all_g22.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2638
+Previous best: 0.2455  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 06:33:31] v47/subs/h7_all_g16.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 31 seconds before sending another submission.
+Submitting h7_all_g16.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:34:07] v47/subs/h7_all_g16.pt
+Submitting h7_all_g16.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2567
+Previous best: 0.2638  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 06:43:19] v47/subs/h7_heavy_g16.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 48 seconds before sending another submission.
+Submitting h7_heavy_g16.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:43:55] v47/subs/h7_heavy_g16.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 6 seconds before sending another submission.
+Submitting h7_heavy_g16.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 06:44:37] v47/subs/h7_heavy_g16.pt
+Submitting h7_heavy_g16.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2662
+Previous best: 0.2638  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 06:55:26] v47/subs/hh7_c3.pt
+Submitting hh7_c3.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2859
+Previous best: 0.2662  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 07:06:15] v47/subs/hh5_c3.pt
+Submitting hh5_c3.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2782
+Previous best: 0.2859  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 07:15:30] v47/subs/hb_prof.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 47 seconds before sending another submission.
+Submitting hb_prof.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:16:05] v47/subs/hb_prof.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 12 seconds before sending another submission.
+Submitting hb_prof.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:16:40] v47/subs/hb_prof.pt
+Submitting hb_prof.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2858
+Previous best: 0.2859  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 07:25:57] v47/subs/hb_comb.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 47 seconds before sending another submission.
+Submitting hb_comb.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:26:33] v47/subs/hb_comb.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 13 seconds before sending another submission.
+Submitting hb_comb.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:27:07] v47/subs/hb_comb.pt
+Submitting hb_comb.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2937
+Previous best: 0.2859  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 07:36:38] v47/subs/p_45_6.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 30 seconds before sending another submission.
+Submitting p_45_6.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:37:14] v47/subs/p_45_6.pt
+Submitting p_45_6.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2248
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 07:46:47] v47/subs/hb_trois.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 25 seconds before sending another submission.
+Submitting hb_trois.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:47:27] v47/subs/hb_trois.pt
+Submitting hb_trois.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2908
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 07:56:47] v47/subs/hb_ens3.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 41 seconds before sending another submission.
+Submitting hb_ens3.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:57:25] v47/subs/hb_ens3.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 3 seconds before sending another submission.
+Submitting hb_ens3.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:58:04] v47/subs/hb_ens3.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting hb_ens3.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 07:58:44] v47/subs/hb_ens3.pt
+Submitting hb_ens3.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2844
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:09:01] v54/subs/q125.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting q125.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 08:09:41] v54/subs/q125.pt
+Submitting q125.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2814
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:19:12] v47/subs/e_50.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 26 seconds before sending another submission.
+Submitting e_50.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 08:19:49] v47/subs/e_50.pt
+Submitting e_50.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2909
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:30:03] v47/subs/hb_comb_pr05.pt
+Submitting hb_comb_pr05.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2868
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:40:09] v47/subs/hb_comb_m19_t115.pt
+Submitting hb_comb_m19_t115.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2914
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:49:41] v47/subs/e_t2_50.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 27 seconds before sending another submission.
+Submitting e_t2_50.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 08:50:18] v47/subs/e_t2_50.pt
+Submitting e_t2_50.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.272
+Previous best: 0.2937  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 08:59:57] v47/subs/e_50b.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 27 seconds before sending another submission.
+Submitting e_50b.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:00:33] v47/subs/e_50b.pt
+Submitting e_50b.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3016
+Previous best: 0.2937  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 09:09:44] v47/subs/hh9_c2.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting hh9_c2.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:10:25] v47/subs/hh9_c2.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting hh9_c2.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:11:01] v47/subs/hh9_c2.pt
+Submitting hh9_c2.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2843
+Previous best: 0.3016  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 09:20:15] v47/subs/e_70.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 36 seconds before sending another submission.
+Submitting e_70.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:21:01] v47/subs/e_70.pt
+Submitting e_70.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2835
+Previous best: 0.3016  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 09:30:11] v47/subs/p_7_7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 51 seconds before sending another submission.
+Submitting p_7_7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:30:46] v47/subs/p_7_7.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 10 seconds before sending another submission.
+Submitting p_7_7.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:31:27] v47/subs/p_7_7.pt
+Submitting p_7_7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3144
+Previous best: 0.3016  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 09:41:47] v47/subs/hb_ensVT.pt
+Submitting hb_ensVT.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3008
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 09:50:59] v47/subs/p_8_8.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 49 seconds before sending another submission.
+Submitting p_8_8.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:51:35] v47/subs/p_8_8.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting p_8_8.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 09:52:15] v47/subs/p_8_8.pt
+Submitting p_8_8.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3068
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:02:01] v47/subs/p_7_6.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 16 seconds before sending another submission.
+Submitting p_7_6.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:02:37] v47/subs/p_7_6.pt
+Submitting p_7_6.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3112
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:11:50] v47/subs/p_6_9.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 47 seconds before sending another submission.
+Submitting p_6_9.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:12:24] v47/subs/p_6_9.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 11 seconds before sending another submission.
+Submitting p_6_9.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:13:01] v47/subs/p_6_9.pt
+Submitting p_6_9.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3056
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:23:28] v70/subs/ep_7_7.pt
+Submitting ep_7_7.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2956
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:32:41] v70/subs/ep_7_7b.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 44 seconds before sending another submission.
+Submitting ep_7_7b.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:33:19] v70/subs/ep_7_7b.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 7 seconds before sending another submission.
+Submitting ep_7_7b.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:33:57] v70/subs/ep_7_7b.pt
+Submitting ep_7_7b.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3076
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:43:34] v47/subs/pc1.pt
+Could not reach the server: ('Connection aborted.', TimeoutError('timed out'))
+Submitting pc1.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 10:44:15] v47/subs/pc1.pt
+Submitting pc1.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.282
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 10:54:34] v47/subs/hb_tout6.pt
+Submitting hb_tout6.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.2928
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 11:03:46] v47/subs/hhg.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 42 seconds before sending another submission.
+Submitting hhg.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 11:04:28] v47/subs/hhg.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 6 seconds before sending another submission.
+Submitting hhg.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 11:05:04] v47/subs/hhg.pt
+Submitting hhg.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.29
+Previous best: 0.3144  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.
+[2026-11-22 11:41:21] v70/subs/p77_m172.pt
+Submitting p77_m172.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3236
+Previous best: 0.3144  (improved: True)
+New best on this task. Score shown is on the public split; the final ranking uses the held out subset, revealed after submissions close.
+[2026-11-22 11:50:33] v70/subs/p77_m176.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 49 seconds before sending another submission.
+Submitting p77_m176.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 11:51:08] v70/subs/p77_m176.pt
+Rejected (HTTP 429): You submitted too recently (last submission successful). Wait 9 seconds before sending another submission.
+Submitting p77_m176.pt to 31-unlearning. Scoring can take a few minutes...
+[2026-11-22 11:51:48] v70/subs/p77_m176.pt
+Submitting p77_m176.pt to 31-unlearning. Scoring can take a few minutes...
+Score (public split): 0.3174
+Previous best: 0.3236  (improved: False)
+Submission accepted. Your previous best on this task still leads. Public-split score; final ranking uses the held out subset.

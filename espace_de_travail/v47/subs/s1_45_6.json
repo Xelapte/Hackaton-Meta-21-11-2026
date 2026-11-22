@@ -1,0 +1,228 @@
+{
+ "args": {
+  "diag": false,
+  "init": null,
+  "mos_exclude_full": false,
+  "target": "delta",
+  "delta": 8.0,
+  "full_classes": "",
+  "ext_anchor": "/p/scratch/training2666/huang25/Epi84/unlearning/ext/coco_val_224.npy",
+  "ext_frac": 1.0,
+  "tilt": 0.0,
+  "teacher_beta": 0.0,
+  "init_shift": false,
+  "delta_slope": 0.0,
+  "class_size": 130.0,
+  "sac_frac": 0.072,
+  "sac_scope": "heavy",
+  "sac_margin": 16.0,
+  "w_sac": 0.3,
+  "sib_k": 0,
+  "sib_delta": 0.0,
+  "sib_full": 0.0,
+  "mid_classes": "0,38,6,7,8,29,30,31,33",
+  "delta_mid": 6.0,
+  "delta_cls": null,
+  "full_thr": 125,
+  "delta_full": 20.0,
+  "delta_part": 4.5,
+  "mos_full_delta": 0.0,
+  "tau": 1.0,
+  "alpha": 0.0,
+  "k_aug": 16,
+  "aug": 1.0,
+  "w_aug": 1.0,
+  "aug_target": "same",
+  "aug_train": 0.25,
+  "w_ret": 1.0,
+  "l2sp": 0.0,
+  "train_blocks": 0,
+  "epochs": 5,
+  "bs": 48,
+  "lr": 5e-05,
+  "seed": 0,
+  "out": "subs/s1_45_6.pt"
+ },
+ "history": [
+  {
+   "epoch": 1,
+   "forget_clean": {
+    "loss_mean": 0.30816158652305603,
+    "loss_std": 0.8306142687797546,
+    "acc": 0.8980000019073486,
+    "maxprob": 0.9086951613426208
+   },
+   "forget_aug": {
+    "loss_mean": 1.1172432899475098,
+    "loss_std": 1.9381955862045288,
+    "acc": 0.6988571286201477,
+    "maxprob": 0.8258112072944641
+   },
+   "kl_target_clean": 0.3508436679840088,
+   "fit_vs_target": {
+    "mean_std": 0.16648775339126587,
+    "pred": 0.7757964134216309,
+    "fit": 0.12916059792041779
+   },
+   "clean_full": {
+    "loss_mean": NaN,
+    "loss_std": NaN,
+    "acc": NaN,
+    "maxprob": NaN
+   },
+   "clean_part": {
+    "loss_mean": 0.30816158652305603,
+    "loss_std": 0.8306142687797546,
+    "acc": 0.8980000019073486,
+    "maxprob": 0.9086951613426208
+   },
+   "kl_orig_mosaic_T2": 0.369891494512558,
+   "agree_orig_mosaic": 0.6337890625,
+   "min": 0.8
+  },
+  {
+   "epoch": 2,
+   "forget_clean": {
+    "loss_mean": 0.3041573166847229,
+    "loss_std": 0.9239537119865417,
+    "acc": 0.9082856774330139,
+    "maxprob": 0.9203956127166748
+   },
+   "forget_aug": {
+    "loss_mean": 1.0586405992507935,
+    "loss_std": 1.9245729446411133,
+    "acc": 0.7125714421272278,
+    "maxprob": 0.8380359411239624
+   },
+   "kl_target_clean": 0.28258180618286133,
+   "fit_vs_target": {
+    "mean_std": 0.16647952795028687,
+    "pred": 0.8194185495376587,
+    "fit": 0.13641642034053802
+   },
+   "clean_full": {
+    "loss_mean": NaN,
+    "loss_std": NaN,
+    "acc": NaN,
+    "maxprob": NaN
+   },
+   "clean_part": {
+    "loss_mean": 0.3041573166847229,
+    "loss_std": 0.9239537119865417,
+    "acc": 0.9082856774330139,
+    "maxprob": 0.9203956127166748
+   },
+   "kl_orig_mosaic_T2": 0.2749844789505005,
+   "agree_orig_mosaic": 0.6982421875,
+   "min": 1.1
+  },
+  {
+   "epoch": 3,
+   "forget_clean": {
+    "loss_mean": 0.38467395305633545,
+    "loss_std": 1.1319078207015991,
+    "acc": 0.8951428532600403,
+    "maxprob": 0.9148706793785095
+   },
+   "forget_aug": {
+    "loss_mean": 1.132361650466919,
+    "loss_std": 2.0266010761260986,
+    "acc": 0.7057142853736877,
+    "maxprob": 0.8357474207878113
+   },
+   "kl_target_clean": 0.2495526224374771,
+   "fit_vs_target": {
+    "mean_std": 0.1904003620147705,
+    "pred": 0.8405255675315857,
+    "fit": 0.1600363701581955
+   },
+   "clean_full": {
+    "loss_mean": NaN,
+    "loss_std": NaN,
+    "acc": NaN,
+    "maxprob": NaN
+   },
+   "clean_part": {
+    "loss_mean": 0.38467395305633545,
+    "loss_std": 1.1319078207015991,
+    "acc": 0.8951428532600403,
+    "maxprob": 0.9148706793785095
+   },
+   "kl_orig_mosaic_T2": 0.2867313623428345,
+   "agree_orig_mosaic": 0.705078125,
+   "min": 1.3
+  },
+  {
+   "epoch": 4,
+   "forget_clean": {
+    "loss_mean": 0.3990917205810547,
+    "loss_std": 1.2172558307647705,
+    "acc": 0.8959999680519104,
+    "maxprob": 0.9196354746818542
+   },
+   "forget_aug": {
+    "loss_mean": 1.1442950963974,
+    "loss_std": 2.0671684741973877,
+    "acc": 0.7068571448326111,
+    "maxprob": 0.8424323201179504
+   },
+   "kl_target_clean": 0.24449734389781952,
+   "fit_vs_target": {
+    "mean_std": 0.19260644912719727,
+    "pred": 0.8437560796737671,
+    "fit": 0.162512868642807
+   },
+   "clean_full": {
+    "loss_mean": NaN,
+    "loss_std": NaN,
+    "acc": NaN,
+    "maxprob": NaN
+   },
+   "clean_part": {
+    "loss_mean": 0.3990917205810547,
+    "loss_std": 1.2172558307647705,
+    "acc": 0.8959999680519104,
+    "maxprob": 0.9196354746818542
+   },
+   "kl_orig_mosaic_T2": 0.26275894045829773,
+   "agree_orig_mosaic": 0.7099609375,
+   "min": 1.6
+  },
+  {
+   "epoch": 5,
+   "forget_clean": {
+    "loss_mean": 0.40492549538612366,
+    "loss_std": 1.2335363626480103,
+    "acc": 0.8951428532600403,
+    "maxprob": 0.9189722537994385
+   },
+   "forget_aug": {
+    "loss_mean": 1.148354411125183,
+    "loss_std": 2.073551893234253,
+    "acc": 0.7048571109771729,
+    "maxprob": 0.8426135778427124
+   },
+   "kl_target_clean": 0.24371251463890076,
+   "fit_vs_target": {
+    "mean_std": 0.19445067644119263,
+    "pred": 0.844257652759552,
+    "fit": 0.16416646540164948
+   },
+   "clean_full": {
+    "loss_mean": NaN,
+    "loss_std": NaN,
+    "acc": NaN,
+    "maxprob": NaN
+   },
+   "clean_part": {
+    "loss_mean": 0.40492549538612366,
+    "loss_std": 1.2335363626480103,
+    "acc": 0.8951428532600403,
+    "maxprob": 0.9189722537994385
+   },
+   "kl_orig_mosaic_T2": 0.25858205556869507,
+   "agree_orig_mosaic": 0.716796875,
+   "min": 1.9
+  }
+ ]
+}

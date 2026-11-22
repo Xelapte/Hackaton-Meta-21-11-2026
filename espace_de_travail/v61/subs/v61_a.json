@@ -1,0 +1,55 @@
+{
+ "choix": {
+  "pixelseal": {
+   "tag": "r2",
+   "variante": "cv",
+   "seuil": 0.5,
+   "post_min_area": 0,
+   "post_rect_fill": 1.01,
+   "miou_train": 0.6430666094776479,
+   "miou_train_seuil_0.5_sans_post": 0.6430666094776479,
+   "miou_entiere": 0.6500256889988613,
+   "miou_patch": 0.6361075299564346,
+   "n": 170
+  },
+  "trustmark": {
+   "tag": "r2",
+   "variante": "cv",
+   "seuil": 0.45,
+   "post_min_area": 0,
+   "post_rect_fill": 1.01,
+   "miou_train": 0.6425811317649046,
+   "miou_train_seuil_0.5_sans_post": 0.6425635846717482,
+   "miou_entiere": 0.6201712433729445,
+   "miou_patch": 0.6649910201568647,
+   "n": 170
+  },
+  "stegastamp": {
+   "tag": "r1",
+   "variante": "cv",
+   "seuil": 0.3,
+   "post_min_area": 0,
+   "post_rect_fill": 1.01,
+   "miou_train": 0.6481342383823284,
+   "miou_train_seuil_0.5_sans_post": 0.6448830429708846,
+   "miou_entiere": 0.6670057736496924,
+   "miou_patch": 0.6292627031149646,
+   "n": 170
+  }
+ },
+ "miou_local_global": 0.6445939932082937,
+ "reference_coequipier": {
+  "unet_feats_cv5_oof.npz": {
+   "pixelseal": 0.47213312349107805,
+   "trustmark": 0.465554540133076,
+   "stegastamp": 0.47258684613606594,
+   "tout": 0.47009150325340665
+  },
+  "unet_h5a_feats_oof.npz": {
+   "pixelseal": 0.46935834714352015,
+   "trustmark": 0.4675652879488616,
+   "stegastamp": 0.4762517504375542,
+   "tout": 0.47105846184331196
+  }
+ }
+}

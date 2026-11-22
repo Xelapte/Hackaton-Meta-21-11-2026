@@ -1,0 +1,40 @@
+{
+ "choix": {
+  "pixelseal": {
+   "runs": "v62/L5",
+   "variante": "emiou",
+   "params": {
+    "a": 0.7,
+    "b": 0.0
+   },
+   "imbrique": {
+    "seuil": 0.676965933737495,
+    "emiou": 0.680756833465639
+   }
+  },
+  "trustmark": {
+   "runs": "v61/r3,v62/L5",
+   "variante": "emiou",
+   "params": {
+    "a": 1.0,
+    "b": 0.0
+   },
+   "imbrique": {
+    "seuil": 0.6721490494742968,
+    "emiou": 0.6761293518507324
+   }
+  },
+  "stegastamp": {
+   "runs": "v62/L5,v62/L7",
+   "variante": "seuil",
+   "params": {
+    "t": 0.5
+   },
+   "imbrique": {
+    "seuil": 0.7967992598543131,
+    "emiou": 0.7954734320962507
+   }
+  }
+ },
+ "imbrique_global": 0.7178951483902282
+}

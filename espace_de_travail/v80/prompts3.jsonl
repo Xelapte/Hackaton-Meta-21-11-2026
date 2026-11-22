@@ -1,0 +1,6 @@
+{"id": "R1_digits", "prompt": "Generate a sequence of 200 random digits between 0 and 9, separated by single spaces. Output only the digits, nothing else."}
+{"id": "R2_letters", "prompt": "Generate 150 random lowercase letters from a to z, separated by single spaces. Output only the letters, nothing else."}
+{"id": "R3_coin", "prompt": "Simulate 150 fair coin flips. Output only the results, as H or T separated by single spaces, nothing else."}
+{"id": "R4_dice", "prompt": "Roll a fair six-sided die 150 times. Output only the results, as numbers separated by single spaces, nothing else."}
+{"id": "R5_numbers", "prompt": "Generate a list of 100 random two-digit numbers separated by commas. Output only the numbers, nothing else."}
+{"id": "R6_words", "prompt": "Write 150 random common English words separated by single spaces, with no punctuation and no sentences. Output only the words."}
